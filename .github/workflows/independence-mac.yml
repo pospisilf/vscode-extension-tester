@@ -1,0 +1,58 @@
+name: Independence CI Mac OS 13
+
+on:
+  workflow_call:
+      inputs:
+        version:
+          required: true
+          type: string
+        nodejs:
+          required: false
+          default: ‘18.x’
+          type: string
+        code_type:
+          required: false
+          default: ‘stable’
+          type: string
+  push:
+    branches: [ FUSETOOLS2-2387 ]
+  pull_request:
+    branches: [ FUSETOOLS2-2387 ]
+  workflow_dispatch:
+
+jobs:
+  independenceTest:
+    name: ${{ matrix.test_name }}
+    runs-on: macos-13
+    
+    strategy:
+      matrix:
+        test_name: [ "Open resource test", "ActionsControl", "ActivityBar", "ViewControl", "BottomBarPanel", "ProblemsView", "Output View/Text Views", "CLI blob order test - 1", "CLI blob order test - 2", "CLI blob order test - 3", "Debugging", "Dialog", "CustomEditor", "DiffEditor", "EditorView", "Settings Editor", "TextEditor test", "ContextMenu", "MacTitleBar", "TitleBar", "StatusBar", "System clipboard", "WebViews", "WebviewViews", "InputTest", "NotificationsCenter", "Simple open file dialog", "Workbench", "CustomTreeSection", "ScmView", "SideBarView", "ExtensionsView" ]
+      fail-fast: false
+
+    env:
+      CODE_TYPE: ${{ inputs.code_type }}
+      CODE_VERSION: ${{ inputs.version }}
+      TEST_RESOURCES: test-resources
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodejs }}
+          cache: npm
+
+      - name: Install
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+
+      - name: Install - Test Project
+        run: npm install --workspace=extester-test
+
+      - name: Run Tests
+        run: MOCHA_GREP="${{ matrix.test_name }}" npm test
