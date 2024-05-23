@@ -57,3 +57,17 @@ jobs:
 
       - name: Run Tests
         run: xvfb-run --auto-servernum npm test
+ 
+      - name: 💾 Upload Screenshots
+        uses: actions/upload-artifact@v4
+        if: failure() && inputs.nodejs != 'lts/*'
+        with:
+          name: screenshots-${{ matrix.test_name }}
+          path: ${{ github.workspace }}/tests/**/screenshots/*.png
+
+      - name: 💾 Upload Screenshots
+        uses: actions/upload-artifact@v4
+        if: failure() && inputs.nodejs == 'lts/*'
+        with:
+          name: screenshots-${{ matrix.test_name }}-lts
+          path: ${{ github.workspace }}/tests/**/screenshots/*.png
