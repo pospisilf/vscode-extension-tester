@@ -59,9 +59,9 @@ jobs:
         run: npm test
 
       - name: Store UI Test Screenshots
-              uses: actions/upload-artifact@v4
-              if: |
-                (failure() || cancelled())
-              with:
-                name: screenshots-${{ matrix.test_name }}
-                path: ${{ github.workspace }}/tests/**/screenshots/*.png
+        uses: actions/upload-artifact@v4
+        if: |
+          (failure() || cancelled())
+        with:
+          name: screenshots-${{ matrix.test_name }}
+          path: ${{ github.workspace }}/tests/**/screenshots/*.png
