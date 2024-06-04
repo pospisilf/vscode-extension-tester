@@ -1,0 +1,105 @@
+name: Ubuntu Individual Test
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      nodejs:
+        required: false
+        default: ‘18.x’
+        type: string
+      code_type:
+        required: false
+        default: ‘stable’
+        type: string
+  push:
+    branches: [fix-menu]
+  pull_request:
+    branches: [fix-menu]
+  workflow_dispatch:
+
+jobs:
+  independenceTest:
+    name: ${{ matrix.test_name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        test_name:
+          [
+            "ContextMenu",
+            "ContextMenu",
+            "ContextMenu",
+            "ContextMenu",
+            "ContextMenu",
+            "ContextMenu",
+            "ContextMenu",
+            "ContextMenu",
+            "ContextMenu",
+            "ContextMenu",
+            "MacTitleBar",
+            "MacTitleBar",
+            "MacTitleBar",
+            "MacTitleBar",
+            "MacTitleBar",
+            "MacTitleBar",
+            "MacTitleBar",
+            "MacTitleBar",
+            "MacTitleBar",
+            "MacTitleBar",
+            "TitleBar",
+            "TitleBar",
+            "TitleBar",
+            "TitleBar",
+            "TitleBar",
+            "TitleBar",
+            "TitleBar",
+            "TitleBar",
+            "TitleBar",
+            "TitleBar",
+          ]
+      fail-fast: false
+
+    env:
+      CODE_TYPE: ${{ inputs.code_type }}
+      CODE_VERSION: ${{ inputs.version }}
+      TEST_RESOURCES: test-resources
+      MOCHA_GREP: ${{ matrix.test_name }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodejs }}
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Install - Test Project
+        run: npm install --workspace=extester-test
+
+      - name: Run Tests
+        run: xvfb-run --auto-servernum npm test
+
+      - name: 💾 Upload Screenshots
+        uses: actions/upload-artifact@v4
+        if: failure() && inputs.nodejs != 'lts/*'
+        with:
+          name: screenshots-${{ matrix.test_name }}
+          path: ${{ github.workspace }}/tests/**/screenshots/*.png
+
+      - name: 💾 Upload Screenshots
+        uses: actions/upload-artifact@v4
+        if: failure() && inputs.nodejs == 'lts/*'
+        with:
+          name: screenshots-${{ matrix.test_name }}-lts
+          path: ${{ github.workspace }}/tests/**/screenshots/*.png
