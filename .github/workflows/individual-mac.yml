@@ -27,7 +27,7 @@ jobs:
 
     strategy:
       matrix:
-        test_name: ["CustomEditor", "DiffEditor", "EditorView", "Settings Editor", "ContentAssist", "TextEditor", "CodeLens"]
+        test_name: ["CustomEditor", "DiffEditor", "EditorView", "Settings Editor", "textEditorTestRunner"]
       fail-fast: false
 
     env:
