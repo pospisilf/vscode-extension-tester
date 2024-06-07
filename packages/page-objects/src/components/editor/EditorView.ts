@@ -259,6 +259,7 @@ export class EditorGroup extends AbstractElement {
 	async closeAllEditors(): Promise<void> {
 		console.log('working91');
 		let titles = await this.getOpenEditorTitles();
+		console.log("title length " + titles.length)
 		console.log('working91');
 		while (titles.length > 0) {
 			console.log('working93');
