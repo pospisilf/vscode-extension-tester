@@ -46,9 +46,8 @@ describe('EditorView', function () {
 		await view.getDriver().sleep(500);
 	});
 
-	after(async () => {
-		await new EditorView().closeAllEditors(0);
-		await new EditorView().closeAllEditors(1);
+	after(async function () {
+		await view.closeAllEditors();
 	});
 
 	// after(async function () {
