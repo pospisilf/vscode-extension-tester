@@ -262,6 +262,7 @@ export class EditorGroup extends AbstractElement {
 		console.log('working91');
 		while (titles.length > 0) {
 			console.log('working93');
+			await new Promise((res) => setTimeout(res, 1000));
 			await this.closeEditor(titles[0]);
 			try {
 				// check if the group still exists
