@@ -211,6 +211,10 @@ describe('EditorView', function () {
 			const allTitles = [...titles1, ...titles2];
 			expect(titles).deep.equals(allTitles);
 		});
+
+		it('close editor', async function () {
+			await view.closeAllEditors();
+		});
 	});
 
 	async function newUntitledFile(title?: string, group?: number, timeout: number = 10000): Promise<void> {
