@@ -50,6 +50,8 @@ describe('EditorView', function () {
 	after(async function () {
 		const editorView = new EditorView();
 
+		VSBrowser.instance.takeScreenshot("why is it failing");
+
 		// Wait for the editor view to be interactable
 		await editorView.getDriver().wait(until.elementIsVisible(editorView), 10000);
 	
