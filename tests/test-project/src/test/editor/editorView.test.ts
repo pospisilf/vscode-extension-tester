@@ -29,6 +29,7 @@ import {
 	DiffEditor,
 	InputBox,
 	VSBrowser,
+	until,
 } from 'vscode-extension-tester';
 
 describe('EditorView', function () {
@@ -47,8 +48,13 @@ describe('EditorView', function () {
 	});
 
 	after(async function () {
-		await view.getDriver().sleep(3000);
-		await new EditorView().closeAllEditors();
+		const editorView = new EditorView();
+
+		// Wait for the editor view to be interactable
+		await editorView.getDriver().wait(until.elementIsVisible(editorView), 10000);
+	
+		// Now attempt to close all editors
+		await editorView.closeAllEditors();
 	});
 
 	it('openEditor works with text editor', async function () {
