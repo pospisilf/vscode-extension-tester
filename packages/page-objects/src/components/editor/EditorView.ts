@@ -257,15 +257,21 @@ export class EditorGroup extends AbstractElement {
 	 * @returns Promise resolving once all tabs have had their close button pressed
 	 */
 	async closeAllEditors(): Promise<void> {
+		console.log('working91');
 		let titles = await this.getOpenEditorTitles();
+		console.log('working91');
 		while (titles.length > 0) {
+			console.log('working93');
 			await this.closeEditor(titles[0]);
 			try {
 				// check if the group still exists
+				console.log('working94');
 				await this.getTagName();
 			} catch (err) {
+				console.log('working95');
 				break;
 			}
+			console.log('working96');
 			titles = await this.getOpenEditorTitles();
 		}
 	}
