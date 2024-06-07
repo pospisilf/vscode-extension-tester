@@ -224,6 +224,20 @@ describe('EditorView', function () {
 			const allTitles = [...titles1, ...titles2];
 			expect(titles).deep.equals(allTitles);
 		});
+
+		it('close current editor', async function () {
+			let groups = await this.getEditorGroups();
+			console.log("working1");
+			while (groups.length > 0 && (await groups[0].getOpenEditorTitles()).length > 0) {
+				console.log("working2");
+				await groups[0].closeAllEditors();
+				console.log("working3");
+				await new Promise((res) => setTimeout(res, 1000));
+				console.log("working4");
+				groups = await this.getEditorGroups();
+				console.log("working5");
+			}
+		});
 	});
 
 	async function newUntitledFile(title?: string, group?: number, timeout: number = 10000): Promise<void> {
