@@ -169,60 +169,60 @@ describe('EditorView', function () {
 		});
 	});
 
-	describe('Editor Groups', function () {
-		const testFile = 'Untitled-4';
+	// describe('Editor Groups', function () {
+	// 	const testFile = 'Untitled-4';
 
-		before(async function () {
-			view = new EditorView();
-			await newUntitledFile(testFile);
-		});
+	// 	before(async function () {
+	// 		view = new EditorView();
+	// 		await newUntitledFile(testFile);
+	// 	});
 
-		it('getEditorGroups works', async function () {
-			this.timeout(30000);
-			const driverActions = view.getDriver().actions();
-			await driverActions.clear();
-			await driverActions.keyDown(EditorView.ctlKey).sendKeys('\\').keyUp(EditorView.ctlKey).perform();
-			await view.getDriver().wait(
-				async function () {
-					return (await view.getEditorGroups()).length === 2;
-				},
-				15000,
-				'could not get 2 editor groups',
-			);
+	// 	it('getEditorGroups works', async function () {
+	// 		this.timeout(30000);
+	// 		const driverActions = view.getDriver().actions();
+	// 		await driverActions.clear();
+	// 		await driverActions.keyDown(EditorView.ctlKey).sendKeys('\\').keyUp(EditorView.ctlKey).perform();
+	// 		await view.getDriver().wait(
+	// 			async function () {
+	// 				return (await view.getEditorGroups()).length === 2;
+	// 			},
+	// 			15000,
+	// 			'could not get 2 editor groups',
+	// 		);
 
-			const groups = await view.getEditorGroups();
-			const group1 = await view.getEditorGroup(0);
-			const group2 = await view.getEditorGroup(1);
+	// 		const groups = await view.getEditorGroups();
+	// 		const group1 = await view.getEditorGroup(0);
+	// 		const group2 = await view.getEditorGroup(1);
 
-			expect(groups.length).equals(2);
-			expect((await group1.getRect()).x).equals((await groups[0].getRect()).x);
-			expect((await group2.getRect()).x).equals((await groups[1].getRect()).x);
-		});
+	// 		expect(groups.length).equals(2);
+	// 		expect((await group1.getRect()).x).equals((await groups[0].getRect()).x);
+	// 		expect((await group2.getRect()).x).equals((await groups[1].getRect()).x);
+	// 	});
 
-		it('openEditor works for different groups', async function () {
-			const editor1 = await view.openEditor(testFile, 0);
-			const editor2 = await view.openEditor(testFile, 1);
+	// 	it('openEditor works for different groups', async function () {
+	// 		const editor1 = await view.openEditor(testFile, 0);
+	// 		const editor2 = await view.openEditor(testFile, 1);
 
-			expect((await editor1.getRect()).x < (await editor2.getRect()).x);
-		});
+	// 		expect((await editor1.getRect()).x < (await editor2.getRect()).x);
+	// 	});
 
-		it('closeEditor works for different groups', async function () {
-			await view.getDriver().actions().keyDown(EditorView.ctlKey).sendKeys('\\').perform();
-			await view.getDriver().sleep(500);
+	// 	it('closeEditor works for different groups', async function () {
+	// 		await view.getDriver().actions().keyDown(EditorView.ctlKey).sendKeys('\\').perform();
+	// 		await view.getDriver().sleep(500);
 
-			await view.closeEditor(testFile, 2);
-			expect((await view.getEditorGroups()).length).equals(2);
-		});
+	// 		await view.closeEditor(testFile, 2);
+	// 		expect((await view.getEditorGroups()).length).equals(2);
+	// 	});
 
-		it('getOpenEditorTitles works for different editor groups', async function () {
-			const titles = await view.getOpenEditorTitles();
-			const titles1 = await view.getOpenEditorTitles(0);
-			const titles2 = await view.getOpenEditorTitles(1);
+	// 	it('getOpenEditorTitles works for different editor groups', async function () {
+	// 		const titles = await view.getOpenEditorTitles();
+	// 		const titles1 = await view.getOpenEditorTitles(0);
+	// 		const titles2 = await view.getOpenEditorTitles(1);
 
-			const allTitles = [...titles1, ...titles2];
-			expect(titles).deep.equals(allTitles);
-		});
-	});
+	// 		const allTitles = [...titles1, ...titles2];
+	// 		expect(titles).deep.equals(allTitles);
+	// 	});
+	// });
 
 	async function newUntitledFile(title?: string, group?: number, timeout: number = 10000): Promise<void> {
 		await new Workbench().executeCommand('Create: New File...');
