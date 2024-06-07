@@ -47,17 +47,21 @@ describe('EditorView', function () {
 		await view.getDriver().sleep(500);
 	});
 
-	after(async function () {
-		const editorView = new EditorView();
-
-		VSBrowser.instance.takeScreenshot("why is it failing");
-
-		// Wait for the editor view to be interactable
-		await editorView.getDriver().wait(until.elementIsVisible(editorView), 10000);
-	
-		// Now attempt to close all editors
-		await editorView.closeAllEditors();
+	after(async () => {
+		await new EditorView().closeAllEditors();
 	});
+
+	// after(async function () {
+	// 	const editorView = new EditorView();
+
+	// 	await VSBrowser.instance.takeScreenshot("why is it failing");
+
+	// 	// Wait for the editor view to be interactable
+	// 	await editorView.getDriver().wait(until.elementIsVisible(editorView), 10000);
+	
+	// 	// Now attempt to close all editors
+	// 	await editorView.closeAllEditors();
+	// });
 
 	it('openEditor works with text editor', async function () {
 		const editor = (await view.openEditor('Untitled-1')) as TextEditor;
