@@ -72,10 +72,16 @@ export class EditorView extends AbstractElement {
 			return groups[groupIndex].closeAllEditors();
 		}
 
+		console.log('working1');
+
 		while (groups.length > 0 && (await groups[0].getOpenEditorTitles()).length > 0) {
+			console.log('working2');
 			await groups[0].closeAllEditors();
+			console.log('working3');
 			await new Promise((res) => setTimeout(res, 1000));
+			console.log('working4');
 			groups = await this.getEditorGroups();
+			console.log('working5');
 		}
 	}
 

@@ -46,7 +46,6 @@ describe('EditorView', function () {
 		await view.getDriver().sleep(500);
 	});
 
-
 	after(async () => {
 		await new EditorView().closeAllEditors(0);
 		await new EditorView().closeAllEditors(1);
@@ -59,7 +58,7 @@ describe('EditorView', function () {
 
 	// 	// Wait for the editor view to be interactable
 	// 	await editorView.getDriver().wait(until.elementIsVisible(editorView), 10000);
-	
+
 	// 	// Now attempt to close all editors
 	// 	await editorView.closeAllEditors();
 	// });
@@ -223,20 +222,6 @@ describe('EditorView', function () {
 
 			const allTitles = [...titles1, ...titles2];
 			expect(titles).deep.equals(allTitles);
-		});
-
-		it('close current editor', async function () {
-			let groups = await this.getEditorGroups();
-			console.log("working1");
-			while (groups.length > 0 && (await groups[0].getOpenEditorTitles()).length > 0) {
-				console.log("working2");
-				await groups[0].closeAllEditors();
-				console.log("working3");
-				await new Promise((res) => setTimeout(res, 1000));
-				console.log("working4");
-				groups = await this.getEditorGroups();
-				console.log("working5");
-			}
 		});
 	});
 
