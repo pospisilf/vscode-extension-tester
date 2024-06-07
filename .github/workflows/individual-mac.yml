@@ -12,7 +12,7 @@ on:
         type: string
       code_type:
         required: false
-        default: ‘max’
+        default: ‘stable’
         type: string
   push:
     branches: [fix-editor]
@@ -32,7 +32,7 @@ jobs:
 
     env:
       CODE_TYPE: ${{ inputs.code_type }}
-      CODE_VERSION: ${{ inputs.version }}
+      CODE_VERSION: max
       TEST_RESOURCES: test-resources
 
     steps:
