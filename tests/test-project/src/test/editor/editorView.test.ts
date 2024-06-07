@@ -46,8 +46,10 @@ describe('EditorView', function () {
 		await view.getDriver().sleep(500);
 	});
 
+
 	after(async () => {
-		await new EditorView().closeAllEditors();
+		await new EditorView().closeAllEditors(0);
+		await new EditorView().closeAllEditors(1);
 	});
 
 	// after(async function () {
@@ -57,117 +59,117 @@ describe('EditorView', function () {
 
 	// 	// Wait for the editor view to be interactable
 	// 	await editorView.getDriver().wait(until.elementIsVisible(editorView), 10000);
-
+	
 	// 	// Now attempt to close all editors
 	// 	await editorView.closeAllEditors();
 	// });
 
-	// it('openEditor works with text editor', async function () {
-	// 	const editor = (await view.openEditor('Untitled-1')) as TextEditor;
-	// 	expect(await editor.getTitle()).equals('Untitled-1');
-	// });
+	it('openEditor works with text editor', async function () {
+		const editor = (await view.openEditor('Untitled-1')) as TextEditor;
+		expect(await editor.getTitle()).equals('Untitled-1');
+	});
 
-	// it('openEditor works with settings editor', async function () {
-	// 	const editor = (await view.openEditor('Settings')) as SettingsEditor;
-	// 	expect(editor.findSetting).not.undefined;
+	it('openEditor works with settings editor', async function () {
+		const editor = (await view.openEditor('Settings')) as SettingsEditor;
+		expect(editor.findSetting).not.undefined;
 
-	// 	await view.closeEditor(await editor.getTitle());
-	// });
+		await view.closeEditor(await editor.getTitle());
+	});
 
-	// it('openEditor works with webview editor', async function () {
-	// 	let editorTitle: string = '';
-	// 	(await view.getOpenEditorTitles()).forEach((title) => {
-	// 		if (title.startsWith('Test WebView')) {
-	// 			editorTitle = title;
-	// 		}
-	// 	});
-	// 	const editor = (await view.openEditor(editorTitle)) as WebView;
-	// 	expect(editor.findWebElement).not.undefined;
+	it('openEditor works with webview editor', async function () {
+		let editorTitle: string = '';
+		(await view.getOpenEditorTitles()).forEach((title) => {
+			if (title.startsWith('Test WebView')) {
+				editorTitle = title;
+			}
+		});
+		const editor = (await view.openEditor(editorTitle)) as WebView;
+		expect(editor.findWebElement).not.undefined;
 
-	// 	await view.closeEditor(editorTitle);
-	// });
+		await view.closeEditor(editorTitle);
+	});
 
-	// it('openEditor works with diff editor', async function () {
-	// 	await view.openEditor('Untitled-2');
+	it('openEditor works with diff editor', async function () {
+		await view.openEditor('Untitled-2');
 
-	// 	await new Workbench().executeCommand('File: Compare Active File With...');
-	// 	let quickOpen: QuickOpenBox | InputBox;
-	// 	if (VSBrowser.instance.version >= '1.44.0') {
-	// 		quickOpen = await InputBox.create();
-	// 	} else {
-	// 		quickOpen = await QuickOpenBox.create();
-	// 	}
-	// 	await quickOpen.setText('Untitled-1');
-	// 	await quickOpen.confirm();
-	// 	await quickOpen.getDriver().sleep(500);
+		await new Workbench().executeCommand('File: Compare Active File With...');
+		let quickOpen: QuickOpenBox | InputBox;
+		if (VSBrowser.instance.version >= '1.44.0') {
+			quickOpen = await InputBox.create();
+		} else {
+			quickOpen = await QuickOpenBox.create();
+		}
+		await quickOpen.setText('Untitled-1');
+		await quickOpen.confirm();
+		await quickOpen.getDriver().sleep(500);
 
-	// 	const diffEditor = (await view.openEditor('Untitled-2 ↔ Untitled-1')) as DiffEditor;
-	// 	await diffEditor.getDriver().sleep(1000);
-	// 	expect(await diffEditor.getOriginalEditor()).not.undefined;
-	// 	expect(await diffEditor.getModifiedEditor()).not.undefined;
-	// });
+		const diffEditor = (await view.openEditor('Untitled-2 ↔ Untitled-1')) as DiffEditor;
+		await diffEditor.getDriver().sleep(1000);
+		expect(await diffEditor.getOriginalEditor()).not.undefined;
+		expect(await diffEditor.getModifiedEditor()).not.undefined;
+	});
 
-	// it('getTabByTitle works', async function () {
-	// 	const tab = await view.getTabByTitle('Untitled-1');
-	// 	expect(tab).not.undefined;
-	// });
+	it('getTabByTitle works', async function () {
+		const tab = await view.getTabByTitle('Untitled-1');
+		expect(tab).not.undefined;
+	});
 
-	// it('getOpenEditorTitles works', async function () {
-	// 	const tabs = await view.getOpenEditorTitles();
-	// 	expect(tabs).not.empty;
-	// 	expect(tabs).contains('Untitled-1');
-	// 	expect(tabs).contains('Untitled-2');
-	// });
+	it('getOpenEditorTitles works', async function () {
+		const tabs = await view.getOpenEditorTitles();
+		expect(tabs).not.empty;
+		expect(tabs).contains('Untitled-1');
+		expect(tabs).contains('Untitled-2');
+	});
 
-	// it('closeEditor works', async function () {
-	// 	await view.closeEditor('Untitled-1');
-	// 	const tabs = await view.getOpenEditorTitles();
-	// 	expect(tabs).not.contains('Untitled-1');
-	// });
+	it('closeEditor works', async function () {
+		await view.closeEditor('Untitled-1');
+		const tabs = await view.getOpenEditorTitles();
+		expect(tabs).not.contains('Untitled-1');
+	});
 
-	// it('getActions works', async function () {
-	// 	const actions = await view.getActions();
-	// 	expect(actions).not.empty;
-	// });
+	it('getActions works', async function () {
+		const actions = await view.getActions();
+		expect(actions).not.empty;
+	});
 
-	// it('getAction(title: string) works', async function () {
-	// 	const action = await view.getAction('More Actions...');
-	// 	expect(await action?.getTitle()).equal('More Actions...');
-	// });
+	it('getAction(title: string) works', async function () {
+		const action = await view.getAction('More Actions...');
+		expect(await action?.getTitle()).equal('More Actions...');
+	});
 
-	// it('getAction(predicate: PredicateFunction) works', async function () {
-	// 	const action = await view.getAction(async (action) => (await action.getTitle()) === 'More Actions...');
-	// 	expect(await action?.getTitle()).equal('More Actions...');
-	// });
+	it('getAction(predicate: PredicateFunction) works', async function () {
+		const action = await view.getAction(async (action) => (await action.getTitle()) === 'More Actions...');
+		expect(await action?.getTitle()).equal('More Actions...');
+	});
 
-	// it('Editor getAction works', async function () {
-	// 	await new EditorView().openEditor('Untitled-2');
-	// 	const editorAction = await view.getAction('Hello World');
-	// 	expect(editorAction).not.undefined;
-	// });
+	it('Editor getAction works', async function () {
+		await new EditorView().openEditor('Untitled-2');
+		const editorAction = await view.getAction('Hello World');
+		expect(editorAction).not.undefined;
+	});
 
-	// describe('Editor Tab', function () {
-	// 	let tab2: EditorTab;
-	// 	let tab3: EditorTab;
+	describe('Editor Tab', function () {
+		let tab2: EditorTab;
+		let tab3: EditorTab;
 
-	// 	before(async function () {
-	// 		await newUntitledFile('Untitled-3');
-	// 		tab2 = await view.getTabByTitle('Untitled-2');
-	// 		tab3 = await view.getTabByTitle('Untitled-3');
-	// 	});
+		before(async function () {
+			await newUntitledFile('Untitled-3');
+			tab2 = await view.getTabByTitle('Untitled-2');
+			tab3 = await view.getTabByTitle('Untitled-3');
+		});
 
-	// 	it('getTitle works', async function () {
-	// 		expect(await tab2.getTitle()).equals('Untitled-2');
-	// 	});
+		it('getTitle works', async function () {
+			expect(await tab2.getTitle()).equals('Untitled-2');
+		});
 
-	// 	it('isSelected works on active tab', async function () {
-	// 		expect(await tab3.isSelected()).to.be.true;
-	// 	});
+		it('isSelected works on active tab', async function () {
+			expect(await tab3.isSelected()).to.be.true;
+		});
 
-	// 	it('isSelected works on inactive tab', async function () {
-	// 		expect(await tab2.isSelected()).to.be.false;
-	// 	});
-	// });
+		it('isSelected works on inactive tab', async function () {
+			expect(await tab2.isSelected()).to.be.false;
+		});
+	});
 
 	describe('Editor Groups', function () {
 		const testFile = 'Untitled-4';
