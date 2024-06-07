@@ -58,7 +58,7 @@ describe('EditorView', function () {
 
 	// 	// Wait for the editor view to be interactable
 	// 	await editorView.getDriver().wait(until.elementIsVisible(editorView), 10000);
-	
+
 	// 	// Now attempt to close all editors
 	// 	await editorView.closeAllEditors();
 	// });
