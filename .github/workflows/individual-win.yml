@@ -12,7 +12,7 @@ on:
         type: string
       code_type:
         required: false
-        default: ‘stable’
+        default: ‘max’
         type: string
   push:
     branches: [fix-editor]
