@@ -48,7 +48,7 @@ describe('EditorView', function () {
 
 	after(async function () {
 		await view.getDriver().sleep(3000);
-		await view.closeAllEditors();
+		await new EditorView().closeAllEditors();
 	});
 
 	it('openEditor works with text editor', async function () {
@@ -210,10 +210,6 @@ describe('EditorView', function () {
 
 			const allTitles = [...titles1, ...titles2];
 			expect(titles).deep.equals(allTitles);
-		});
-
-		it('close editor', async function () {
-			await view.closeAllEditors();
 		});
 	});
 
