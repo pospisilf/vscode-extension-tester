@@ -47,6 +47,7 @@ describe('EditorView', function () {
 	});
 
 	after(async function () {
+		await view.getDriver().sleep(3000);
 		await view.closeAllEditors();
 	});
 
