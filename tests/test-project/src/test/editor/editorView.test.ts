@@ -29,7 +29,6 @@ import {
 	DiffEditor,
 	InputBox,
 	VSBrowser,
-	until,
 } from 'vscode-extension-tester';
 
 describe('EditorView', function () {
