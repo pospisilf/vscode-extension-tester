@@ -25,7 +25,7 @@ import { AbstractElement } from '../AbstractElement';
 import { Breakpoint } from './Breakpoint';
 import { ChromiumWebDriver } from 'selenium-webdriver/chromium';
 
-export class BreakpointError extends Error {}
+export class BreakpointError extends Error { }
 
 /**
  * Page object representing the active text editor
@@ -594,6 +594,24 @@ export class TextEditor extends Editor {
 			return true;
 		}
 		return false;
+	}
+
+	async toggleConditionalBreakpoint(line: number, expression?: string, hitCount?: number, logMessage?: string): Promise<void> {
+		// Execute action
+		const workbench = new Workbench();
+		await workbench.executeCommand('Debug: Add Conditional Breakpoint');
+
+		// // option box -> it's possible to change which one option i want use -> WORKING!
+		// const box = await this.findElement(By.className('monaco-select-box'));
+		// const optionToSelect = await box.findElement(By.xpath("//option[text()='Hit Count']")); // replace Hit Count with required option
+		// await optionToSelect.click();
+
+	
+		// Write value - NOT WORKING!
+		const breakpont = await this.findElement(By.className("ced-breakpointwidgetdecoration-34b8d3f4-4")); // but it's ::after pseudoelement :-(
+		await breakpont.click();
+		await breakpont.getDriver().actions().sendKeys("ABCD" + Key.ENTER);
+		await breakpont.getDriver().actions().sendKeys("ABCD" + Key.ENTER).perform();
 	}
 
 	/**

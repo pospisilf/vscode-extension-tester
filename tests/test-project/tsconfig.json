@@ -4,7 +4,8 @@
     "outDir": "out",
     "rootDir": "src",
     "forceConsistentCasingInFileNames": true,
-    "strict": true
+    "strict": false,
+    "noUnusedLocals": false
   },
   "include": ["src"]
 }
