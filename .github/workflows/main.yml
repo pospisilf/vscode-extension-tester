@@ -2,9 +2,9 @@ name: 🏗️ Main CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, issue-1449]
   pull_request:
-    branches: [main]
+    branches: [main, issue-1449]
   workflow_dispatch:
 
 concurrency:
