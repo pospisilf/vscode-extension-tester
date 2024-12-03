@@ -12,12 +12,23 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "extester-runner.helloWorld",
-        "title": "Hello World"
-      }
-    ]
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "extesterRunner",
+          "title": "ExTester Runner",
+          "icon": "resources/logo.png"
+        }
+      ]
+    },
+    "views": {
+      "extesterRunner": [
+        {
+          "id": "extesterView",
+          "name": "Test Explorer"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

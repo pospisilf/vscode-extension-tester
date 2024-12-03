@@ -1,26 +1,36 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  // Register a tree view provider
+  const testTreeProvider = new ExtesterTreeProvider();
+  vscode.window.registerTreeDataProvider('extesterView', testTreeProvider);
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "extester-runner" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('extester-runner.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Extester Runner!');
-	});
-
-	context.subscriptions.push(disposable);
+  // Add other activation code here
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
+
+class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
+  private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined | void> = new vscode.EventEmitter<TreeItem | undefined | void>();
+  readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event;
+
+  getTreeItem(element: TreeItem): vscode.TreeItem {
+    return element;
+  }
+
+  getChildren(element?: TreeItem): Thenable<TreeItem[]> {
+    if (!element) {
+      return Promise.resolve([
+        new TreeItem('Run All Tests', vscode.TreeItemCollapsibleState.None),
+        new TreeItem('Test Suite 1', vscode.TreeItemCollapsibleState.Collapsed),
+      ]);
+    }
+    return Promise.resolve([new TreeItem('Test Case 1'), new TreeItem('Test Case 2')]);
+  }
+}
+
+class TreeItem extends vscode.TreeItem {
+  constructor(label: string, collapsibleState?: vscode.TreeItemCollapsibleState) {
+    super(label, collapsibleState);
+  }
+}
