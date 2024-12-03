@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
-export function deactivate() {}
+export function deactivate() { }
 
 class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined | void> =
@@ -36,47 +36,48 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
   }
 
   getChildren(element?: TreeItem): Thenable<TreeItem[]> {
-	if (!element) {
-	  // If no parent, return top-level folders
-	  const folderMap = this.groupFilesByFolder();
-	  return Promise.resolve(
-		Array.from(folderMap.keys()).map(
-		  (folder) => new TreeItem(folder, vscode.TreeItemCollapsibleState.Collapsed, true)
-		)
-	  );
-	} else if (element.isFolder && typeof element.label === 'string') {
-	  // If the parent is a folder and label is a string, return its files
-	  const folderMap = this.groupFilesByFolder();
-	  const files = folderMap.get(element.label) || [];
-	  return Promise.resolve(
-		files.map(
-		  (file) =>
-			new TreeItem(
-			  file,
-			  vscode.TreeItemCollapsibleState.None,
-			  false,
-			  path.join(element.label as string, file)
-			)
-		)
-	  );
-	}
-	return Promise.resolve([]);
+    if (!element) {
+      // If no parent, return top-level folders
+      const folderMap = this.groupFilesByFolder();
+      return Promise.resolve(
+        Array.from(folderMap.keys()).map(
+          (folder) => new TreeItem(folder, vscode.TreeItemCollapsibleState.Collapsed, true)
+        )
+      );
+    } else if (element.isFolder && typeof element.label === 'string') {
+      // If the parent is a folder and label is a string, return its files
+      const folderMap = this.groupFilesByFolder();
+      const files = folderMap.get(element.label) || [];
+      const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+      return Promise.resolve(
+        files.map(
+          (file) =>
+            new TreeItem(
+              file,
+              vscode.TreeItemCollapsibleState.None,
+              false,
+              path.join(workspaceFolder, element.label as string, file) // Correct file path
+            )
+        )
+      );
+    }
+    return Promise.resolve([]);
   }
- 
+
   private async findTestFiles(): Promise<void> {
-	try {
-	  const files = await vscode.workspace.findFiles('**/*.test.ts', '**/node_modules/**');
-	  this.files = files;
-	  this._onDidChangeTreeData.fire();
-	} catch (error) {
-	  if (error instanceof Error) {
-		vscode.window.showErrorMessage(`Error finding test files: ${error.message}`);
-	  } else {
-		vscode.window.showErrorMessage(`Unknown error occurred while finding test files.`);
-	  }
-	}
+    try {
+      const files = await vscode.workspace.findFiles('**/*.test.ts', '**/node_modules/**');
+      this.files = files;
+      this._onDidChangeTreeData.fire();
+    } catch (error) {
+      if (error instanceof Error) {
+        vscode.window.showErrorMessage(`Error finding test files: ${error.message}`);
+      } else {
+        vscode.window.showErrorMessage(`Unknown error occurred while finding test files.`);
+      }
+    }
   }
- 
+
   private groupFilesByFolder(): Map<string, string[]> {
     const folderMap = new Map<string, string[]>();
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
@@ -105,10 +106,10 @@ class TreeItem extends vscode.TreeItem {
   ) {
     super(label, collapsibleState);
 
-	// Set a folder or file icon
-	this.iconPath = isFolder
-	? new vscode.ThemeIcon('folder')
-	: new vscode.ThemeIcon('file');
+    // Set a folder or file icon
+    this.iconPath = isFolder
+      ? new vscode.ThemeIcon('folder')
+      : new vscode.ThemeIcon('file');
 
     this.contextValue = isFolder ? 'folder' : 'file';
     if (!isFolder && filePath) {
