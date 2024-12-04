@@ -12,6 +12,21 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "ExTester Runner",
+      "properties": {
+        "extesterRunner.testFileGlob": {
+          "type": "string",
+          "default": "**/*.test.ts",
+          "description": "Glob pattern to find test files in the workspace. Default is '**/*.test.ts'."
+        },
+        "extesterRunner.excludeGlob": {
+          "type": "string",
+          "default": "**/node_modules/**",
+          "description": "Glob pattern to exclude paths from test file search. Default is '**/node_modules/**'."
+        }
+      }
+    },
     "commands": [
     {
       "command": "extester-runner.refreshTests",
