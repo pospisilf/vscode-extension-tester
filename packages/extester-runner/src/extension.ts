@@ -6,8 +6,17 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.registerTreeDataProvider('extesterView', treeDataProvider);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('extesterRunner.refreshTests', () => {
+    vscode.commands.registerCommand('extester-runner.refreshTests', () => {
       treeDataProvider.refresh();
+    })
+  );
+
+  // Register the "Run All" command
+  context.subscriptions.push(
+    vscode.commands.registerCommand('extester-runner.runAll', async () => {
+      vscode.window.showInformationMessage('Running all tests...');
+      // Simulate backend logic for running tests
+      await runAllTests();
     })
   );
 }
@@ -120,4 +129,37 @@ class TreeItem extends vscode.TreeItem {
       };
     }
   }
+}
+
+async function runAllTests() {
+  // Show a notification to the user
+  vscode.window.showInformationMessage('Running UI tests in the terminal...');
+
+  // Find an existing terminal or create a new one
+  let terminal = vscode.window.terminals.find(t => t.name === 'UI Test Runner');
+  if (!terminal) {
+    terminal = vscode.window.createTerminal({
+      name: 'UI Test Runner', // Name of the terminal
+    });
+  }
+
+  // Focus the terminal and send the command
+  terminal.show();
+  terminal.sendText('npm run ui-test');
+
+  // Optionally, show progress while the command runs
+  await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Running UI tests...",
+      cancellable: false,
+    },
+    async () => {
+      // Simulate a short delay for demonstration purposes
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  );
+
+  // Notify the user once the process is initiated
+  vscode.window.showInformationMessage('UI tests have been initiated in the terminal.');
 }

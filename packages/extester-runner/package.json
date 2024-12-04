@@ -15,7 +15,15 @@
     "commands": [
     {
       "command": "extester-runner.refreshTests",
-      "title": "Extester Runner: Refresh tests"
+      "title": "Extester Runner: Refresh tests",
+      "icon": "$(refresh)",
+      "tooltip": "Refresh list of tests" 
+    },
+    {
+      "command": "extester-runner.runAll",
+      "title": "Extester Runner: Run all tests",
+      "icon": "$(play)",
+      "tooltip": "Run all tests"
     }
     ],
     "viewsContainers": {
@@ -34,7 +42,21 @@
           "name": "Test Explorer"
         }
       ]
-    }
+    },
+    "menus": {
+    "view/title": [
+      {
+        "command": "extester-runner.runAll",
+        "when": "view == extesterView",
+        "group": "navigation"
+      },
+      {
+        "command": "extester-runner.refreshTests",
+        "when": "view == extesterView",
+        "group": "navigation"
+      }
+    ]
+  }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
