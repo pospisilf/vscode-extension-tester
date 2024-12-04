@@ -75,7 +75,13 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
   private async findTestFiles(): Promise<void> {
     try {
-      const files = await vscode.workspace.findFiles('**/*.test.ts', '**/node_modules/**');
+      // Get settings or use the default
+      const configuration = vscode.workspace.getConfiguration('extesterRunner');
+      const testFileGlob = configuration.get<string>('testFileGlob') || '**/*.test.ts';
+      const excludeGlob = configuration.get<string>('excludeGlob') || '**/node_modules/**';
+  
+      // Use the settings in findFiles
+      const files = await vscode.workspace.findFiles(testFileGlob, excludeGlob);
       this.files = files;
       this._onDidChangeTreeData.fire();
     } catch (error) {
@@ -86,6 +92,20 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
       }
     }
   }
+  
+  // private async findTestFiles(): Promise<void> {
+  //   try {
+  //     const files = await vscode.workspace.findFiles('**/*.test.ts', '**/node_modules/**');
+  //     this.files = files;
+  //     this._onDidChangeTreeData.fire();
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       vscode.window.showErrorMessage(`Error finding test files: ${error.message}`);
+  //     } else {
+  //       vscode.window.showErrorMessage(`Unknown error occurred while finding test files.`);
+  //     }
+  //   }
+  // }
 
   private groupFilesByFolder(): Map<string, string[]> {
     const folderMap = new Map<string, string[]>();
