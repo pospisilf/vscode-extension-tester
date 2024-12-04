@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs/promises';
 
 export function activate(context: vscode.ExtensionContext) {
   const treeDataProvider = new ExtesterTreeProvider();
@@ -11,17 +12,15 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // Register the "Run All" command
   context.subscriptions.push(
     vscode.commands.registerCommand('extester-runner.runAll', async () => {
       vscode.window.showInformationMessage('Running all tests...');
-      // Simulate backend logic for running tests
       await runAllTests();
     })
   );
 }
 
-export function deactivate() { }
+export function deactivate() {}
 
 class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined | void> =
@@ -30,9 +29,10 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
     this._onDidChangeTreeData.event;
 
   private files: vscode.Uri[] = [];
+  private parsedContent: Map<string, string[]> = new Map();
 
   constructor() {
-    this.refresh(); // Load the test files on initialization
+    this.refresh();
   }
 
   refresh(): void {
@@ -44,45 +44,52 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
     return element;
   }
 
-  getChildren(element?: TreeItem): Thenable<TreeItem[]> {
+  async getChildren(element?: TreeItem): Promise<TreeItem[]> {
     if (!element) {
-      // If no parent, return top-level folders
       const folderMap = this.groupFilesByFolder();
-      return Promise.resolve(
-        Array.from(folderMap.keys()).map(
-          (folder) => new TreeItem(folder, vscode.TreeItemCollapsibleState.Collapsed, true)
-        )
+      return Array.from(folderMap.keys()).map(
+        (folder) => new TreeItem(folder, vscode.TreeItemCollapsibleState.Collapsed, true)
       );
     } else if (element.isFolder && typeof element.label === 'string') {
-      // If the parent is a folder and label is a string, return its files
       const folderMap = this.groupFilesByFolder();
       const files = folderMap.get(element.label) || [];
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
-      return Promise.resolve(
-        files.map(
-          (file) =>
-            new TreeItem(
-              file,
-              vscode.TreeItemCollapsibleState.None,
-              false,
-              path.join(workspaceFolder, element.label as string, file) // Correct file path
-            )
-        )
+      return files.map(
+        (file) =>
+          new TreeItem(
+            file,
+            vscode.TreeItemCollapsibleState.Collapsed,
+            false,
+            path.join(workspaceFolder, element.label as string, file)
+          )
+      );
+    } else if (!element.isFolder && element.filePath) {
+      const content = this.parsedContent.get(element.filePath) || [];
+      return content.map(
+        (label) => new TreeItem(label, vscode.TreeItemCollapsibleState.None, false)
       );
     }
-    return Promise.resolve([]);
+    return [];
   }
 
   private async findTestFiles(): Promise<void> {
     try {
-      // Get settings or use the default
       const configuration = vscode.workspace.getConfiguration('extesterRunner');
       const testFileGlob = configuration.get<string>('testFileGlob') || '**/*.test.ts';
       const excludeGlob = configuration.get<string>('excludeGlob') || '**/node_modules/**';
-  
-      // Use the settings in findFiles
+
       const files = await vscode.workspace.findFiles(testFileGlob, excludeGlob);
       this.files = files;
+      this.parsedContent.clear();
+
+      await Promise.all(
+        files.map(async (fileUri) => {
+          const filePath = fileUri.fsPath;
+          const content = await this.parseFile(filePath);
+          this.parsedContent.set(filePath, content);
+        })
+      );
+
       this._onDidChangeTreeData.fire();
     } catch (error) {
       if (error instanceof Error) {
@@ -92,20 +99,26 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
       }
     }
   }
-  
-  // private async findTestFiles(): Promise<void> {
-  //   try {
-  //     const files = await vscode.workspace.findFiles('**/*.test.ts', '**/node_modules/**');
-  //     this.files = files;
-  //     this._onDidChangeTreeData.fire();
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       vscode.window.showErrorMessage(`Error finding test files: ${error.message}`);
-  //     } else {
-  //       vscode.window.showErrorMessage(`Unknown error occurred while finding test files.`);
-  //     }
-  //   }
-  // }
+
+  private async parseFile(filePath: string): Promise<string[]> {
+    try {
+      const fileContent = await fs.readFile(filePath, 'utf8');
+      const describeOrItRegex = /(describe|it)\(['"](.*?)['"]\s*,/g;
+
+      const matches: string[] = [];
+      let match;
+
+      // Iterate through the file to maintain the original order of describe and it blocks
+      while ((match = describeOrItRegex.exec(fileContent)) !== null) {
+        matches.push(`${match[1]}: ${match[2]}`);
+      }
+
+      return matches;
+    } catch (error) {
+      vscode.window.showErrorMessage(`Error parsing file ${filePath}: ${error}`);
+      return [];
+    }
+  }
 
   private groupFilesByFolder(): Map<string, string[]> {
     const folderMap = new Map<string, string[]>();
@@ -135,7 +148,6 @@ class TreeItem extends vscode.TreeItem {
   ) {
     super(label, collapsibleState);
 
-    // Set a folder or file icon
     this.iconPath = isFolder
       ? new vscode.ThemeIcon('folder')
       : new vscode.ThemeIcon('file');
@@ -152,22 +164,18 @@ class TreeItem extends vscode.TreeItem {
 }
 
 async function runAllTests() {
-  // Show a notification to the user
   vscode.window.showInformationMessage('Running UI tests in the terminal...');
 
-  // Find an existing terminal or create a new one
   let terminal = vscode.window.terminals.find(t => t.name === 'UI Test Runner');
   if (!terminal) {
     terminal = vscode.window.createTerminal({
-      name: 'UI Test Runner', // Name of the terminal
+      name: 'UI Test Runner',
     });
   }
 
-  // Focus the terminal and send the command
   terminal.show();
   terminal.sendText('npm run ui-test');
 
-  // Optionally, show progress while the command runs
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -175,11 +183,9 @@ async function runAllTests() {
       cancellable: false,
     },
     async () => {
-      // Simulate a short delay for demonstration purposes
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
   );
 
-  // Notify the user once the process is initiated
   vscode.window.showInformationMessage('UI tests have been initiated in the terminal.');
 }
