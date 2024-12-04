@@ -29,7 +29,7 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
     this._onDidChangeTreeData.event;
 
   private files: vscode.Uri[] = [];
-  private parsedContent: Map<string, string[]> = new Map();
+  private parsedContent: Map<string, { line: number; label: string }[]> = new Map();
 
   constructor() {
     this.refresh();
@@ -66,7 +66,8 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
     } else if (!element.isFolder && element.filePath) {
       const content = this.parsedContent.get(element.filePath) || [];
       return content.map(
-        (label) => new TreeItem(label, vscode.TreeItemCollapsibleState.None, false)
+        (item) =>
+          new TreeItem(item.label, vscode.TreeItemCollapsibleState.None, false, element.filePath, item.line)
       );
     }
     return [];
@@ -100,18 +101,20 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
     }
   }
 
-  private async parseFile(filePath: string): Promise<string[]> {
+  private async parseFile(filePath: string): Promise<{ line: number; label: string }[]> {
     try {
       const fileContent = await fs.readFile(filePath, 'utf8');
       const describeOrItRegex = /(describe|it)\(['"](.*?)['"]\s*,/g;
 
-      const matches: string[] = [];
+      const matches: { line: number; label: string }[] = [];
       let match;
 
-      // Iterate through the file to maintain the original order of describe and it blocks
-      while ((match = describeOrItRegex.exec(fileContent)) !== null) {
-        matches.push(`${match[1]}: ${match[2]}`);
-      }
+      const lines = fileContent.split('\n');
+      lines.forEach((line, index) => {
+        while ((match = describeOrItRegex.exec(line)) !== null) {
+          matches.push({ line: index, label: `${match[1]}: ${match[2]}` });
+        }
+      });
 
       return matches;
     } catch (error) {
@@ -144,7 +147,8 @@ class TreeItem extends vscode.TreeItem {
     label: string,
     collapsibleState: vscode.TreeItemCollapsibleState,
     public isFolder: boolean,
-    public filePath?: string
+    public filePath?: string,
+    public lineNumber?: number
   ) {
     super(label, collapsibleState);
 
@@ -154,11 +158,19 @@ class TreeItem extends vscode.TreeItem {
 
     this.contextValue = isFolder ? 'folder' : 'file';
     if (!isFolder && filePath) {
-      this.command = {
-        command: 'vscode.open',
-        title: 'Open File',
-        arguments: [vscode.Uri.file(filePath)],
-      };
+      this.command = lineNumber !== undefined
+        ? {
+            command: 'vscode.open',
+            title: 'Open File',
+            arguments: [vscode.Uri.file(filePath), {
+              selection: new vscode.Range(lineNumber, 0, lineNumber, 0)
+            }],
+          }
+        : {
+            command: 'vscode.open',
+            title: 'Open File',
+            arguments: [vscode.Uri.file(filePath)],
+          };
     }
   }
 }
