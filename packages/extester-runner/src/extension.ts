@@ -152,9 +152,15 @@ class TreeItem extends vscode.TreeItem {
   ) {
     super(label, collapsibleState);
 
-    this.iconPath = isFolder
-      ? new vscode.ThemeIcon('folder')
-      : new vscode.ThemeIcon('file');
+    if (isFolder) {
+      this.iconPath = new vscode.ThemeIcon('folder');
+    } else if (label.startsWith('describe:')) {
+      this.iconPath = new vscode.ThemeIcon('symbol-enum');
+    } else if (label.startsWith('it:')) {
+      this.iconPath = new vscode.ThemeIcon('symbol-constant');
+    } else {
+      this.iconPath = new vscode.ThemeIcon('file');
+    }
 
     this.contextValue = isFolder ? 'folder' : 'file';
     if (!isFolder && filePath) {
