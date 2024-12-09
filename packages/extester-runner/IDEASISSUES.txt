@@ -1,5 +1,0 @@
-Known issue: 
-Currently only describe or it is parsed. There's issue with describe.skip, describe.only, etc., also conditions are not parsed.
-
-Ideas: 
-Highlight test if there's .only in file!
