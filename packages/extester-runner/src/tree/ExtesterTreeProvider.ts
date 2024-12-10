@@ -81,24 +81,65 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
     return [];
 }
 
-/**
- * Creates TreeItems from hierarchical test nodes.
- */
-private createTreeItemsFromTestNodes(nodes: TestNode[], filePath: string): TreeItem[] {
-    return nodes.map((node) => {
-        const collapsibleState = node.children?.length
-            ? vscode.TreeItemCollapsibleState.Collapsed
-            : vscode.TreeItemCollapsibleState.None;
+// /**
+//  * Creates TreeItems from hierarchical test nodes.
+//  */
+// private createTreeItemsFromTestNodes(nodes: TestNode[], filePath: string): TreeItem[] {
+//     return nodes.map((node) => {
+//         const collapsibleState = node.children?.length
+//             ? vscode.TreeItemCollapsibleState.Collapsed
+//             : vscode.TreeItemCollapsibleState.None;
 
-        return new TreeItem(
-            node.label,
-            collapsibleState,
-            false,
-            filePath,
-            node.line
-        );
-    });
+//         return new TreeItem(
+//             node.label,
+//             collapsibleState,
+//             false,
+//             filePath,
+//             node.line
+//         );
+//     });
+// }
+private createTreeItemsFromTestNodes(nodes: TestNode[], filePath: string): TreeItem[] {
+  return nodes.map((node) => {
+      const collapsibleState = node.children?.length
+          ? vscode.TreeItemCollapsibleState.Collapsed
+          : vscode.TreeItemCollapsibleState.None;
+
+      const isDescribe = !!node.children?.length; // Distinguish describe from it
+      const icon = isDescribe ? new vscode.ThemeIcon('bracket') : new vscode.ThemeIcon('symbol-variable'); // VS Code codicons
+
+      const treeItem = new TreeItem(
+          node.label,
+          collapsibleState,
+          false,
+          filePath,
+          node.line
+      );
+
+      // Set the hover text
+      treeItem.tooltip = isDescribe ? 'describe' : 'it';
+
+      // Set the icon
+      treeItem.iconPath = icon;
+
+      // Attach a command to navigate to the file and line
+      if (node.line !== undefined) {
+          treeItem.command = {
+              command: 'vscode.open',
+              title: 'Open File',
+              arguments: [
+                  vscode.Uri.file(filePath),
+                  {
+                      selection: new vscode.Range(node.line, 0, node.line, 0),
+                  },
+              ],
+          };
+      }
+
+      return treeItem;
+  });
 }
+
 
 /**
  * Finds a node by its label in a tree of TestNode objects.
