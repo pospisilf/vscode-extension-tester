@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 import { ExtesterTreeProvider } from './tree/ExtesterTreeProvider';
 import { runAllTests } from './utils/runTests';
+import { registerOpenFileAtLineCommand } from './tree/TreeItem';
 
 export function activate(context: vscode.ExtensionContext) {
+  console.log('Extension activated');
   const treeDataProvider = new ExtesterTreeProvider();
   vscode.window.registerTreeDataProvider('extesterView', treeDataProvider);
 
@@ -18,6 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
       await runAllTests();
     })
   );
+  registerOpenFileAtLineCommand(context);
 }
 
 export function deactivate() {}

@@ -81,65 +81,46 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
     return [];
 }
 
-// /**
-//  * Creates TreeItems from hierarchical test nodes.
-//  */
-// private createTreeItemsFromTestNodes(nodes: TestNode[], filePath: string): TreeItem[] {
-//     return nodes.map((node) => {
-//         const collapsibleState = node.children?.length
-//             ? vscode.TreeItemCollapsibleState.Collapsed
-//             : vscode.TreeItemCollapsibleState.None;
-
-//         return new TreeItem(
-//             node.label,
-//             collapsibleState,
-//             false,
-//             filePath,
-//             node.line
-//         );
-//     });
-// }
 private createTreeItemsFromTestNodes(nodes: TestNode[], filePath: string): TreeItem[] {
-  return nodes.map((node) => {
-      const collapsibleState = node.children?.length
-          ? vscode.TreeItemCollapsibleState.Collapsed
-          : vscode.TreeItemCollapsibleState.None;
+    return nodes.map((node) => {
+        const collapsibleState = node.children?.length
+            ? vscode.TreeItemCollapsibleState.Collapsed
+            : vscode.TreeItemCollapsibleState.None;
 
-      const isDescribe = !!node.children?.length; // Distinguish describe from it
-      const icon = isDescribe ? new vscode.ThemeIcon('bracket') : new vscode.ThemeIcon('symbol-variable'); // VS Code codicons
+        const isDescribe = !!node.children?.length; // Distinguish describe from it
+        const icon = isDescribe ? new vscode.ThemeIcon('bracket') : new vscode.ThemeIcon('symbol-variable'); // VS Code codicons
 
-      const treeItem = new TreeItem(
-          node.label,
-          collapsibleState,
-          false,
-          filePath,
-          node.line
-      );
+        const treeItem = new TreeItem(
+            node.label,
+            collapsibleState,
+            false,
+            filePath,
+            node.line // Pass line number
+        );
 
-      // Set the hover text
-      treeItem.tooltip = isDescribe ? 'describe' : 'it';
+        // Set the hover text
+        treeItem.tooltip = isDescribe ? 'describe' : 'it';
 
-      // Set the icon
-      treeItem.iconPath = icon;
+        // Set the icon
+        treeItem.iconPath = icon;
 
-      // Attach a command to navigate to the file and line
-      if (node.line !== undefined) {
-          treeItem.command = {
-              command: 'vscode.open',
-              title: 'Open File',
-              arguments: [
-                  vscode.Uri.file(filePath),
-                  {
-                      selection: new vscode.Range(node.line, 0, node.line, 0),
-                  },
-              ],
-          };
-      }
+        // Attach a command to navigate to the file and specific line
+        if (node.line !== undefined) {
+            const zeroBasedLine = node.line; // Already 0-based from `parseFile`
+            treeItem.command = {
+                command: 'vscode-runner.openFileAtLine',
+                title: 'Open File',
+                arguments: [
+                    filePath,
+                    zeroBasedLine,
+                ],
+            };
+            console.log(`Setting command for ${node.label} to open ${filePath} at line ${zeroBasedLine}`);
+        }
 
-      return treeItem;
-  });
+        return treeItem;
+    });
 }
-
 
 /**
  * Finds a node by its label in a tree of TestNode objects.
@@ -204,47 +185,93 @@ private getTreeItemLabelAsString(label: string | vscode.TreeItemLabel | undefine
 
 
 
-  private async parseFile(filePath: string): Promise<{ label: string; children?: any[] }[]> {
+//   private async parseFile(filePath: string): Promise<{ label: string; children?: any[] }[]> {
+//     try {
+//         const fileContent = await fs.readFile(filePath, 'utf8');
+//         const describeOrItRegex = /(describe|it)\(['"](.*?)['"]\s*,/g;
+
+//         const lines = fileContent.split('\n');
+
+//         // Stack to maintain the current hierarchy
+//         const stack: { label: string; children?: any[] }[] = [];
+//         let root: { label: string; children?: any[] }[] = [];
+
+//         lines.forEach((line) => {
+//             let match;
+//             while ((match = describeOrItRegex.exec(line)) !== null) {
+//                 const [_, type, label] = match;
+
+//                 if (type === 'describe') {
+//                     const node = { label, children: [] };
+//                     if (stack.length === 0) {
+//                         // Root describe
+//                         root.push(node);
+//                     } else {
+//                         // Nested describe
+//                         stack[stack.length - 1].children?.push(node);
+//                     }
+//                     stack.push(node);
+//                 } else if (type === 'it') {
+//                     const node = { label };
+//                     if (stack.length === 0) {
+//                         // Root-level it (unusual but possible)
+//                         root.push(node);
+//                     } else {
+//                         // it belongs to the current describe
+//                         stack[stack.length - 1].children?.push(node);
+//                     }
+//                 }
+
+//                 // Handle ending blocks by detecting `});`
+//                 if (line.trim() === '});') {
+//                     stack.pop();
+//                 }
+//             }
+//         });
+
+//         return root;
+//     } catch (error) {
+//         vscode.window.showErrorMessage(`Error parsing file ${filePath}: ${error}`);
+//         return [];
+//     }
+// }
+private async parseFile(filePath: string): Promise<TestNode[]> {
     try {
         const fileContent = await fs.readFile(filePath, 'utf8');
-        const describeOrItRegex = /(describe|it)\(['"](.*?)['"]\s*,/g;
-
+        const describeOrItRegex = /(describe|it)\(['"](.*?)['"]\s*,/;
         const lines = fileContent.split('\n');
 
-        // Stack to maintain the current hierarchy
-        const stack: { label: string; children?: any[] }[] = [];
-        let root: { label: string; children?: any[] }[] = [];
+        const stack: TestNode[] = [];
+        const root: TestNode[] = [];
 
-        lines.forEach((line) => {
-            let match;
-            while ((match = describeOrItRegex.exec(line)) !== null) {
+        lines.forEach((line, lineNumber) => {
+            const match = line.match(describeOrItRegex);
+
+            if (match) {
                 const [_, type, label] = match;
 
+                const node: TestNode = { label, line: lineNumber }; // Add line number
+
                 if (type === 'describe') {
-                    const node = { label, children: [] };
+                    node.children = []; // Describes have children
                     if (stack.length === 0) {
-                        // Root describe
                         root.push(node);
                     } else {
-                        // Nested describe
                         stack[stack.length - 1].children?.push(node);
                     }
                     stack.push(node);
                 } else if (type === 'it') {
-                    const node = { label };
                     if (stack.length === 0) {
-                        // Root-level it (unusual but possible)
                         root.push(node);
                     } else {
-                        // it belongs to the current describe
                         stack[stack.length - 1].children?.push(node);
                     }
                 }
+            }
 
-                // Handle ending blocks by detecting `});`
-                if (line.trim() === '});') {
-                    stack.pop();
-                }
+            // Handle closing blocks
+            if (line.trim() === '});') {
+                stack.pop();
             }
         });
 
@@ -254,6 +281,7 @@ private getTreeItemLabelAsString(label: string | vscode.TreeItemLabel | undefine
         return [];
     }
 }
+
 
 
   private groupFilesByFolder(): Map<string, string[]> {
