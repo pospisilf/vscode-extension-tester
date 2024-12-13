@@ -1,0 +1,52 @@
+{
+  "name": "extester-runner",
+  "displayName": "ExTester Runner",
+  "description": "Extension for vscode-extension-tester which allow users to run, debug, list tests directly inside VS Code.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extester-runner.parseTests",
+        "title": "Parse ExTester Tests"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "testvscode": "vscode-test",
+    "test": "mocha --require ts-node/register ./**/*.test.mjs"
+  },
+  "devDependencies": {
+    "@types/babel__parser": "^7.0.0",
+    "@types/babel__traverse": "^7.20.6",
+    "@types/chai": "^5.0.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/sinon": "^17.0.3",
+    "@types/vscode": "^1.96.0",
+    "@typescript-eslint/eslint-plugin": "^8.10.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "chai": "^5.1.2",
+    "eslint": "^9.13.0",
+    "mocha": "^11.0.1",
+    "sinon": "^19.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3",
+    "vscode": "^1.1.34",
+    "vscode-test": "^1.6.1"
+  }
+}
