@@ -13,21 +13,32 @@ export function activate(context: vscode.ExtensionContext) {
       treeDataProvider.refresh();
     })
   );
-  // Modification: Register `extesterRunner.openTestItem` command
-context.subscriptions.push(
-  vscode.commands.registerCommand('extesterRunner.openTestItem', async (filePath: string, lineNumber?: number) => {
-    if (filePath && lineNumber !== undefined) {
-      const document = await vscode.workspace.openTextDocument(filePath); // Open the file
-      const editor = await vscode.window.showTextDocument(document); // Show the file in the editor
 
-      // Move the cursor to the specified line
-      const position = new vscode.Position(lineNumber - 1, 0); // Convert to 0-based index
-      const range = new vscode.Range(position, position);
-      editor.revealRange(range, vscode.TextEditorRevealType.InCenter); // Center the line in the editor
-      editor.selection = new vscode.Selection(position, position); // Set the cursor to the line
-    }
-  })
-);
+
+context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'extesterRunner.openTestItem',
+      async (filePath: string, lineNumber?: number) => {
+        if (filePath) {
+          try {
+            const document = await vscode.workspace.openTextDocument(filePath); // Open the file
+            const editor = await vscode.window.showTextDocument(document); // Show the file in the editor
+
+            // If a line number is specified, move the cursor there
+            if (lineNumber !== undefined) {
+              const position = new vscode.Position(lineNumber - 1, 0); // Convert to 0-based index
+              const range = new vscode.Range(position, position);
+              editor.revealRange(range, vscode.TextEditorRevealType.InCenter); // Center the line in the editor
+              editor.selection = new vscode.Selection(position, position); // Set the cursor to the line
+            }
+          } catch (error) {
+            vscode.window.showErrorMessage(`Failed to open file: ${error}`);
+          }
+        }
+      }
+    )
+  );
+
 
 }
 
@@ -339,10 +350,10 @@ class TreeItem extends vscode.TreeItem {
     // Add a command to open the file when clicked (if it's a file or test block)
     if (!isFolder && filePath) {
       this.command = {
-        command: 'extesterRunner.openTestItem', // Custom command for navigation
+        command: 'extesterRunner.openTestItem', // Command to open the file
         title: 'Open Test Item',
-        arguments: [this.filePath, this.lineNumber], // Pass file path and line number
+        arguments: [this.filePath], // Pass the file path to the command
       };
-    }
+    }    
   }
 }
