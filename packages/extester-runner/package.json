@@ -12,33 +12,10 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
-    "configuration": {
-      "title": "ExTester Runner",
-      "properties": {
-        "extesterRunner.testFileGlob": {
-          "type": "string",
-          "default": "**/*.test.ts",
-          "description": "Glob pattern to find test files in the workspace. Default is '**/*.test.ts'."
-        },
-        "extesterRunner.excludeGlob": {
-          "type": "string",
-          "default": "**/node_modules/**",
-          "description": "Glob pattern to exclude paths from test file search. Default is '**/node_modules/**'."
-        }
-      }
-    },
     "commands": [
     {
       "command": "extester-runner.refreshTests",
-      "title": "Extester Runner: Refresh tests",
-      "icon": "$(refresh)",
-      "tooltip": "Refresh list of tests" 
-    },
-    {
-      "command": "extester-runner.runAll",
-      "title": "Extester Runner: Run all tests",
-      "icon": "$(play)",
-      "tooltip": "Run all tests"
+      "title": "Extester Runner: Refresh tests"
     }
     ],
     "viewsContainers": {
@@ -57,21 +34,7 @@
           "name": "Test Explorer"
         }
       ]
-    },
-    "menus": {
-    "view/title": [
-      {
-        "command": "extester-runner.runAll",
-        "when": "view == extesterView",
-        "group": "navigation"
-      },
-      {
-        "command": "extester-runner.refreshTests",
-        "when": "view == extesterView",
-        "group": "navigation"
-      }
-    ]
-  }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
