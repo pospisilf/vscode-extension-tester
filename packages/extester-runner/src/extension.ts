@@ -297,6 +297,8 @@ private convertTestBlocksToTreeItems(testBlocks: TestBlock[]): TreeItem[] {
     describeItem.tooltip = `Line ${block.line}`;
     describeItem.contextValue = 'describeBlock';
 
+    describeItem.iconPath = new vscode.ThemeIcon('bracket'); // Example built-in icon
+
     // Create TreeItems for `its` inside this `describe` block
     const itItems = block.its.map((it) => {
       const itItem = new TreeItem(
@@ -310,6 +312,10 @@ private convertTestBlocksToTreeItems(testBlocks: TestBlock[]): TreeItem[] {
       // Add tooltip for the line number
       itItem.tooltip = `Line ${it.line}`;
       itItem.contextValue = 'itBlock';
+
+      itItem.iconPath = new vscode.ThemeIcon('variable');
+
+
       return itItem;
     });
 
