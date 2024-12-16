@@ -47,6 +47,22 @@ context.subscriptions.push(
     )
   );
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand('extester-runner.runFolder', async (item: TreeItem) => {
+        vscode.window.showInformationMessage(`Running tests in folder: ${item.label}`);
+        await runFolder();
+        // Implement your logic for running folder-related tests
+    })
+);
+
+context.subscriptions.push(
+    vscode.commands.registerCommand('extester-runner.runFile', async (item: TreeItem) => {
+        vscode.window.showInformationMessage(`Running tests in file: ${item.filePath}`);
+        await runFile();
+        // Implement your logic for running file-related tests
+    })
+);
+
 
 }
 
@@ -377,3 +393,11 @@ async function runAllTests() {
   vscode.window.showInformationMessage('To be done -> runAllTests()');
 
 }
+
+function runFolder() {
+  vscode.window.showInformationMessage(`run folder inside`);
+}
+function runFile() {
+  vscode.window.showInformationMessage(`run file inside`);
+}
+

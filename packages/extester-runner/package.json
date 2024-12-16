@@ -13,17 +13,27 @@
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
-    {
-      "command": "extester-runner.refreshTests",
-      "title": "Extester Runner: Refresh tests",
-      "icon": "$(refresh)",
-      "tooltip": "Refresh list of tests" 
+      {
+        "command": "extester-runner.refreshTests",
+        "title": "Extester Runner: Refresh tests",
+        "icon": "$(refresh)",
+        "tooltip": "Refresh list of tests"
+      },
+      {
+        "command": "extester-runner.runAll",
+        "title": "Extester Runner: Run all tests",
+        "icon": "$(play)",
+        "tooltip": "Run all tests"
+      },
+      {
+        "command": "extester-runner.runFolder",
+        "icon": "$(play)",
+        "title": "Run Folder"
     },
     {
-      "command": "extester-runner.runAll",
-      "title": "Extester Runner: Run all tests",
-      "icon": "$(play)",
-      "tooltip": "Run all tests"
+        "command": "extester-runner.runFile",
+        "icon": "$(play)",
+        "title": "Run File"
     }
     ],
     "viewsContainers": {
@@ -54,6 +64,18 @@
           "command": "extester-runner.refreshTests",
           "when": "view == extesterView",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "extester-runner.runFolder",
+          "when": "viewItem == folder",
+          "group": "inline"
+        },
+        {
+          "command": "extester-runner.runFile",
+          "when": "viewItem == file",
+          "group": "inline"
         }
       ]
     }
