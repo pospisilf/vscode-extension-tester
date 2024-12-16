@@ -9,8 +9,16 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.registerTreeDataProvider('extesterView', treeDataProvider);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('extesterRunner.refreshTests', () => {
+    vscode.commands.registerCommand('extester-runner.refreshTests', () => {
       treeDataProvider.refresh();
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('extester-runner.runAll', async () => {
+      vscode.window.showInformationMessage('Running all tests...');
+      // Simulate backend logic for running tests
+      await runAllTests();
     })
   );
 
@@ -362,4 +370,10 @@ class TreeItem extends vscode.TreeItem {
       };
     }    
   }
+}
+
+async function runAllTests() {
+
+  vscode.window.showInformationMessage('To be done -> runAllTests()');
+
 }
