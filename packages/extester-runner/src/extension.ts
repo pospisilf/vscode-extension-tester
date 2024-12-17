@@ -26,14 +26,14 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('extester-runner.runFolder', async (item: TreeItem) => {
       vscode.window.showInformationMessage(`Running tests in folder: ${item.label}`);
-      await runFolder();
+      await runFolder(item.label as string);
     })
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand('extester-runner.runFile', async (item: TreeItem) => {
       vscode.window.showInformationMessage(`Running tests in file: ${item.filePath}`);
-      await runFile();
+      await runFile(item.filePath as string);
     })
   );
 
@@ -403,12 +403,49 @@ class TreeItem extends vscode.TreeItem {
 }
 
 async function runAllTests() {
+  const configuration = vscode.workspace.getConfiguration('extesterRunner');
+  const testFileGlob = configuration.get<string>('testFileGlob') || '**/*.test.ts';
+
   vscode.window.showInformationMessage('To be done -> runAllTests()');
+   // Find an existing terminal or create a new one
+   let terminal = vscode.window.terminals.find(t => t.name === 'UI Test Runner');
+   if (!terminal) {
+     terminal = vscode.window.createTerminal({
+       name: 'UI Test Runner', // Name of the terminal
+     });
+   }
+   // Focus the terminal and send the command
+   terminal.show();
+   terminal.sendText(`npx extest setup-and-run ${testFileGlob}`);
+   
 }
 
-function runFolder() {
-  vscode.window.showInformationMessage(`To be done -> runFolder()`);
+async function runFolder(folder: string) {
+
+  vscode.window.showInformationMessage('To be done -> runAllTests()');
+   // Find an existing terminal or create a new one
+   let terminal = vscode.window.terminals.find(t => t.name === 'UI Test Runner');
+   if (!terminal) {
+     terminal = vscode.window.createTerminal({
+       name: 'UI Test Runner', // Name of the terminal
+     });
+   }
+   // Focus the terminal and send the command
+   terminal.show();
+   terminal.sendText(`npx extest setup-and-run ${folder}`);
+
+  // vscode.window.showInformationMessage(`To be done -> runFolder()`);
 }
-function runFile() {
+function runFile(file: string) {
   vscode.window.showInformationMessage(`To be done -> runFile()`);
+     // Find an existing terminal or create a new one
+     let terminal = vscode.window.terminals.find(t => t.name === 'UI Test Runner');
+     if (!terminal) {
+       terminal = vscode.window.createTerminal({
+         name: 'UI Test Runner', // Name of the terminal
+       });
+     }
+     // Focus the terminal and send the command
+     terminal.show();
+     terminal.sendText(`npx extest setup-and-run ${file}`);
 }
