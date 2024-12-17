@@ -241,7 +241,15 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
   private async findTestFiles(): Promise<void> {
     try {
       // Search for files matching the pattern '**/*.test.ts', excluding node_modules
-      const files = await vscode.workspace.findFiles('**/*.test.ts', '**/node_modules/**');
+      // Get settings or use the default
+      const configuration = vscode.workspace.getConfiguration('extesterRunner');
+      const testFileGlob = configuration.get<string>('testFileGlob') || '**/*.test.ts';
+      const excludeGlob = configuration.get<string>('excludeGlob') || '**/node_modules/**';
+
+      // Use the settings in findFiles
+      const files = await vscode.workspace.findFiles(testFileGlob, excludeGlob);
+
+
       this.files = files; // Store the found files
       this._onDidChangeTreeData.fire(); // Notify the tree view to refresh
     } catch (error) {
