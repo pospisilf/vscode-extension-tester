@@ -61,6 +61,25 @@ export function activate(context: vscode.ExtensionContext) {
       }
     )
   );
+
+  // File save event: Trigger tree view refresh
+  context.subscriptions.push(
+    vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
+      // Check if the saved file matches test files pattern
+      const configuration = vscode.workspace.getConfiguration('extesterRunner');
+      const testFileGlob = configuration.get<string>('testFileGlob') || '**/*.test.ts';
+
+      if (vscode.workspace.workspaceFolders) {
+        const workspaceFolder = vscode.workspace.workspaceFolders[0];
+        const relativePath = vscode.workspace.asRelativePath(document.uri.fsPath);
+
+        // Use a simple match to check if file is a test file
+        if (vscode.workspace.getConfiguration().get('files.eol')) { // EOL-based refresh
+          treeDataProvider.refresh();
+        } 
+      }
+    })
+  );
 }
 
 export function deactivate() { }
@@ -192,6 +211,7 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
   // Trigger a refresh of the tree view
   refresh(): void {
+    this.parsedFiles.clear(); // Clear the cache to force re-parsing
     this._onDidChangeTreeData.fire(); // Notify VS Code to update the tree
     this.findTestFiles(); // Search for test files in the workspace
   }
@@ -248,7 +268,6 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
       // Use the settings in findFiles
       const files = await vscode.workspace.findFiles(testFileGlob, excludeGlob);
-
 
       this.files = files; // Store the found files
       this._onDidChangeTreeData.fire(); // Notify the tree view to refresh
