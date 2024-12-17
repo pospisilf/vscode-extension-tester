@@ -2,6 +2,7 @@
 
 ## Known Issues
 
+- Add support for chosing path/exclude path in settings
 - Tests with conditionals ~~or `.skip/.only`~~ do not display correctly.
 - The Test Explorer does not have a consistent order of items.
 - **Refresh behavior**: Issues when editing/creating/deleting tests and saving.

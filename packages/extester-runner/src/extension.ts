@@ -2,28 +2,43 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { parse } from '@babel/parser';
 import traverse from '@babel/traverse';
-import * as t from '@babel/types'; // Import Babel types for type checks
+import * as t from '@babel/types';
 
 export function activate(context: vscode.ExtensionContext) {
   const treeDataProvider = new ExtesterTreeProvider();
   vscode.window.registerTreeDataProvider('extesterView', treeDataProvider);
 
+  // top level buttons
   context.subscriptions.push(
     vscode.commands.registerCommand('extester-runner.refreshTests', () => {
       treeDataProvider.refresh();
     })
   );
 
+  // test runners
   context.subscriptions.push(
     vscode.commands.registerCommand('extester-runner.runAll', async () => {
       vscode.window.showInformationMessage('Running all tests...');
-      // Simulate backend logic for running tests
       await runAllTests();
     })
   );
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand('extester-runner.runFolder', async (item: TreeItem) => {
+      vscode.window.showInformationMessage(`Running tests in folder: ${item.label}`);
+      await runFolder();
+    })
+  );
 
-context.subscriptions.push(
+  context.subscriptions.push(
+    vscode.commands.registerCommand('extester-runner.runFile', async (item: TreeItem) => {
+      vscode.window.showInformationMessage(`Running tests in file: ${item.filePath}`);
+      await runFile();
+    })
+  );
+
+  // commands
+  context.subscriptions.push(
     vscode.commands.registerCommand(
       'extesterRunner.openTestItem',
       async (filePath: string, lineNumber?: number) => {
@@ -46,31 +61,13 @@ context.subscriptions.push(
       }
     )
   );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('extester-runner.runFolder', async (item: TreeItem) => {
-        vscode.window.showInformationMessage(`Running tests in folder: ${item.label}`);
-        await runFolder();
-        // Implement your logic for running folder-related tests
-    })
-);
-
-context.subscriptions.push(
-    vscode.commands.registerCommand('extester-runner.runFile', async (item: TreeItem) => {
-        vscode.window.showInformationMessage(`Running tests in file: ${item.filePath}`);
-        await runFile();
-        // Implement your logic for running file-related tests
-    })
-);
-
-
 }
 
 export function deactivate() { }
 
 interface TestBlock {
   describe: string;
-  line: number; // Line of occurrence
+  line: number;
   its: { name: string; modifier: string | null; line: number }[];
   children: TestBlock[];
 }
@@ -80,99 +77,99 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
   const content = document.getText();
 
   const ast = parse(content, {
-      sourceType: "module",
-      plugins: ["typescript"], // Handle TypeScript-specific syntax
+    sourceType: "module",
+    plugins: ["typescript"], // Handle TypeScript-specific syntax
   });
 
   const testStructure: TestBlock[] = []; // Root structure
   const stack: TestBlock[] = []; // Stack for managing nesting
 
   traverse(ast, {
-      CallExpression(path) {
-          const callee = path.node.callee;
-          let functionName: string | undefined = undefined;
-          let modifier: string | null = null;
+    CallExpression(path) {
+      const callee = path.node.callee;
+      let functionName: string | undefined = undefined;
+      let modifier: string | null = null;
 
-          // Identify function name and modifier (e.g., `describe`, `it.skip`)
-          if (t.isIdentifier(callee)) {
-              functionName = callee.name;
-          } else if (t.isMemberExpression(callee)) {
-              const object = callee.object;
-              const property = callee.property;
-              if (t.isIdentifier(object) && t.isIdentifier(property)) {
-                  functionName = object.name;
-                  modifier = property.name; // Handle `.skip`, `.only`, etc.
-              }
+      // Identify function name and modifier (e.g., `describe`, `it.skip`)
+      if (t.isIdentifier(callee)) {
+        functionName = callee.name;
+      } else if (t.isMemberExpression(callee)) {
+        const object = callee.object;
+        const property = callee.property;
+        if (t.isIdentifier(object) && t.isIdentifier(property)) {
+          functionName = object.name;
+          modifier = property.name; // Handle `.skip`, `.only`, etc.
+        }
+      }
+
+      // Get line of occurrence
+      const line = path.node.loc?.start.line || 0;
+
+      // Handle `describe` blocks
+      if (functionName === "describe") {
+        const describeArg = path.node.arguments[0];
+        const describeName = t.isStringLiteral(describeArg)
+          ? describeArg.value
+          : "Unnamed Describe";
+
+        const newDescribeBlock: TestBlock = {
+          describe: describeName,
+          line: line, // Add line number
+          its: [],
+          children: [],
+        };
+
+        // Add to parent block's children or root structure
+        if (stack.length > 0) {
+          const parent = stack[stack.length - 1];
+          parent.children.push(newDescribeBlock);
+        } else {
+          testStructure.push(newDescribeBlock);
+        }
+
+        stack.push(newDescribeBlock); // Push current block to stack
+        return; // Skip further processing in this CallExpression for now
+      }
+
+      // Handle `it` blocks
+      if (functionName === "it") {
+        const itArg = path.node.arguments[0];
+        const itName = t.isStringLiteral(itArg) ? itArg.value : "Unnamed It";
+
+        const itBlock = {
+          name: itName,
+          modifier: modifier,
+          line: line, // Add line number
+        };
+
+        // Add to the `its` array of the current `describe` block
+        if (stack.length > 0) {
+          const currentDescribe = stack[stack.length - 1];
+          currentDescribe.its.push(itBlock);
+        }
+      }
+    },
+
+    // Check exit condition for `describe` blocks
+    exit(path) {
+      if (path.isCallExpression()) {
+        const callee = path.node.callee;
+        let functionName: string | undefined = undefined;
+
+        if (t.isIdentifier(callee)) {
+          functionName = callee.name;
+        } else if (t.isMemberExpression(callee)) {
+          const object = callee.object;
+          if (t.isIdentifier(object)) {
+            functionName = object.name;
           }
+        }
 
-          // Get line of occurrence
-          const line = path.node.loc?.start.line || 0;
-
-          // Handle `describe` blocks
-          if (functionName === "describe") {
-              const describeArg = path.node.arguments[0];
-              const describeName = t.isStringLiteral(describeArg)
-                  ? describeArg.value
-                  : "Unnamed Describe";
-
-              const newDescribeBlock: TestBlock = {
-                  describe: describeName,
-                  line: line, // Add line number
-                  its: [],
-                  children: [],
-              };
-
-              // Add to parent block's children or root structure
-              if (stack.length > 0) {
-                  const parent = stack[stack.length - 1];
-                  parent.children.push(newDescribeBlock);
-              } else {
-                  testStructure.push(newDescribeBlock);
-              }
-
-              stack.push(newDescribeBlock); // Push current block to stack
-              return; // Skip further processing in this CallExpression for now
-          }
-
-          // Handle `it` blocks
-          if (functionName === "it") {
-              const itArg = path.node.arguments[0];
-              const itName = t.isStringLiteral(itArg) ? itArg.value : "Unnamed It";
-
-              const itBlock = {
-                  name: itName,
-                  modifier: modifier,
-                  line: line, // Add line number
-              };
-
-              // Add to the `its` array of the current `describe` block
-              if (stack.length > 0) {
-                  const currentDescribe = stack[stack.length - 1];
-                  currentDescribe.its.push(itBlock);
-              }
-          }
-      },
-
-      // Check exit condition for `describe` blocks
-      exit(path) {
-          if (path.isCallExpression()) {
-              const callee = path.node.callee;
-              let functionName: string | undefined = undefined;
-
-              if (t.isIdentifier(callee)) {
-                  functionName = callee.name;
-              } else if (t.isMemberExpression(callee)) {
-                  const object = callee.object;
-                  if (t.isIdentifier(object)) {
-                      functionName = object.name;
-                  }
-              }
-
-              if (functionName === "describe") {
-                  stack.pop(); // Pop the current `describe` block from the stack
-              }
-          }
-      },
+        if (functionName === "describe") {
+          stack.pop(); // Pop the current `describe` block from the stack
+        }
+      }
+    },
   });
 
   return testStructure;
@@ -205,7 +202,6 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
   }
 
   // Get children for a given tree item
-  // Tohle generuje strom!
   async getChildren(element?: TreeItem): Promise<TreeItem[]> {
     if (!element) {
       // Return top-level folders
@@ -219,16 +215,15 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
       const folderMap = this.groupFilesByFolder();
       const files = folderMap.get(element.label) || [];
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
-      // Modification: Pass `filePath` when creating TreeItems for files
-return files.map(
-  (file) =>
-    new TreeItem(
-      file,
-      vscode.TreeItemCollapsibleState.Collapsed,
-      false,
-      path.join(workspaceFolder, element.label as string, file) // Pass the file path
-    )
-);
+      return files.map(
+        (file) =>
+          new TreeItem(
+            file,
+            vscode.TreeItemCollapsibleState.Collapsed,
+            false,
+            path.join(workspaceFolder, element.label as string, file) // Pass the file path
+          )
+      );
 
     } else if (!element.isFolder && element.filePath) {
       // Parse the file content and build the tree structure
@@ -238,11 +233,9 @@ return files.map(
       // If the element has children, return them
       return element.children;
     }
-  
+
     return []; // Return an empty list by default
   }
-  
-  
 
   // Find test files in the workspace
   private async findTestFiles(): Promise<void> {
@@ -293,7 +286,7 @@ return files.map(
       const parsedContent = await parseTestFile(uri);
       this.parsedFiles.set(filePath, parsedContent);
 
-       // Log the parsed content to verify -> debug purpose
+      // Log the parsed content to verify -> debug purpose
       console.log(`Parsed content for file: ${filePath}`);
       console.log(JSON.stringify(parsedContent, null, 2));
 
@@ -305,56 +298,51 @@ return files.map(
     }
   }
 
-// Modification: Pass `lineNumber` to TreeItem
-private convertTestBlocksToTreeItems(testBlocks: TestBlock[]): TreeItem[] {
-  return testBlocks.map((block) => {
-    // Create a TreeItem for the `describe` block
-    const describeItem = new TreeItem(
-      block.describe,
-      vscode.TreeItemCollapsibleState.Collapsed,
-      false,
-      undefined, // No file path for `describe`
-      block.line // Pass the line number
-    );
-
-    // Add tooltip for the line number
-    describeItem.tooltip = `Line ${block.line}`;
-    describeItem.contextValue = 'describeBlock';
-
-    describeItem.iconPath = new vscode.ThemeIcon('bracket'); // Example built-in icon
-
-    // Create TreeItems for `its` inside this `describe` block
-    const itItems = block.its.map((it) => {
-      const itItem = new TreeItem(
-        `it: ${it.name} ${it.modifier ? `[${it.modifier}]` : ''}`,
-        vscode.TreeItemCollapsibleState.None,
+  private convertTestBlocksToTreeItems(testBlocks: TestBlock[]): TreeItem[] {
+    return testBlocks.map((block) => {
+      // Create a TreeItem for the `describe` block
+      const describeItem = new TreeItem(
+        block.describe,
+        vscode.TreeItemCollapsibleState.Collapsed,
         false,
-        undefined, // No file path for `it`
-        it.line // Pass the line number
+        undefined, // No file path for `describe`
+        block.line // Pass the line number
       );
 
-      // Add tooltip for the line number
-      itItem.tooltip = `Line ${it.line}`;
-      itItem.contextValue = 'itBlock';
+      // describe parameters in tree view
+      describeItem.tooltip = 'describe';
+      describeItem.contextValue = 'describeBlock';
+      describeItem.iconPath = new vscode.ThemeIcon('bracket');
 
-      itItem.iconPath = new vscode.ThemeIcon('variable');
+      // Create TreeItems for `its` inside this `describe` block
+      const itItems = block.its.map((it) => {
+        const itItem = new TreeItem(
+          `it: ${it.name} ${it.modifier ? `[${it.modifier}]` : ''}`, // zobrazeni it v treeiview
+          vscode.TreeItemCollapsibleState.None,
+          false,
+          undefined, // No file path for `it`
+          it.line // Pass the line number
+        );
 
+        // it parameters in tree view
+        itItem.tooltip = 'it';
+        itItem.contextValue = 'itBlock';
+        itItem.iconPath = new vscode.ThemeIcon('variable');
 
-      return itItem;
+        return itItem;
+      });
+
+      // Recursively process nested `describe` blocks
+      const nestedDescribeItems = this.convertTestBlocksToTreeItems(block.children);
+
+      // Attach all child items (both `it` blocks and nested `describe` blocks)
+      describeItem.children = [...itItems, ...nestedDescribeItems];
+
+      return describeItem; // Return the fully built TreeItem
     });
-
-    // Recursively process nested `describe` blocks
-    const nestedDescribeItems = this.convertTestBlocksToTreeItems(block.children);
-
-    // Attach all child items (both `it` blocks and nested `describe` blocks)
-    describeItem.children = [...itItems, ...nestedDescribeItems];
-
-    return describeItem; // Return the fully built TreeItem
-  });
-}
+  }
 
 }
-
 
 class TreeItem extends vscode.TreeItem {
   children: TreeItem[] | undefined; // Optional property to store child items
@@ -384,20 +372,17 @@ class TreeItem extends vscode.TreeItem {
         title: 'Open Test Item',
         arguments: [this.filePath], // Pass the file path to the command
       };
-    }    
+    }
   }
 }
 
 async function runAllTests() {
-
   vscode.window.showInformationMessage('To be done -> runAllTests()');
-
 }
 
 function runFolder() {
-  vscode.window.showInformationMessage(`run folder inside`);
+  vscode.window.showInformationMessage(`To be done -> runFolder()`);
 }
 function runFile() {
-  vscode.window.showInformationMessage(`run file inside`);
+  vscode.window.showInformationMessage(`To be done -> runFile()`);
 }
-
