@@ -85,6 +85,7 @@ export function deactivate() { }
 interface TestBlock {
   describe: string;
   line: number;
+  modifier: string | null;
   its: { name: string; modifier: string | null; line: number }[];
   children: TestBlock[];
 }
@@ -135,6 +136,7 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
           line: line, // add line number
           its: [],
           children: [],
+          modifier: modifier
         };
 
         // add to parent block's children or root structure
@@ -333,7 +335,9 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
     return testBlocks.map((block) => {
       // create a TreeItem for the `describe` block
       const describeItem = new TreeItem(
-        block.describe,
+        // block.describe,
+        // `${it.name} ${it.modifier ? `[${it.modifier}]` : ''}`,
+        `${block.describe} ${block.modifier ? `[${block.modifier}]` : ''}`,
         vscode.TreeItemCollapsibleState.Collapsed,
         false,
         undefined, // no file path for `describe`

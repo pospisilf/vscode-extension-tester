@@ -5,7 +5,7 @@
 | Loading all files matching regex to View                                       | yes           | yes             |         |
 | Splitting files based on specific directories                                  | yes           | yes             |         |
 | Basic parsing of describes and tests                                           | yes           | yes             |         |
-| Support skip/only for describe                                                 | yes           | TBD             |         |
+| Support skip/only for describe                                                 | yes           | yes             |         |
 | Support skip/only for it                                                       | yes           | yes             |         |
 | Parsing decsribe/it with condition                                             | no            | ---             |         |
 | Manual refresh button                                                          | yes           | yes             |         |
