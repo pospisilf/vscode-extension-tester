@@ -2,6 +2,12 @@
   "name": "extester-runner",
   "displayName": "extester-runner",
   "description": "to be defined",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/redhat-developer/vscode-extension-tester.git",
+    "directory": "packages/extester-runner"
+  },
+  "license": "Apache-2.0",
   "version": "0.0.37",
   "engines": {
     "vscode": "^1.96.0"
