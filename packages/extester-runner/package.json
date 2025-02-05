@@ -1,0 +1,201 @@
+{
+  "extends": "../../tsconfig.json",
+  "name": "extester-runner",
+  "displayName": "extester-runner",
+  "description": "to be defined",
+  "version": "0.0.37",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "taskDefinitions": [
+      {
+        "type": "extester-runner-task",
+        "required": [],
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "ExTester runner tasks definitions."
+          }
+        }
+      }
+    ],
+    "colors": [
+      {
+        "id": "extesterrunner.only",
+        "description": "The color used for the 'only' modifier.",
+        "defaults": {
+          "light": "#42A5F5",
+          "dark": "#64B5F6",
+          "highContrast": "#00BFFF"
+        }
+      },
+      {
+        "id": "extesterrunner.skip",
+        "description": "The color used for the 'skip' modifier.",
+        "defaults": {
+          "light": "#FFA726",
+          "dark": "#FFB74D",
+          "highContrast": "#FF8C00"
+        }
+      }
+    ],
+    "configuration": {
+      "title": "ExTester Runner",
+      "properties": {
+        "extesterRunner.testFileGlob": {
+          "type": "string",
+          "default": "**/*.test.ts",
+          "markdownDescription": "Glob pattern to find test files in the workspace. Default is `**/*.test.ts`."
+        },
+        "extesterRunner.excludeGlob": {
+          "type": "string",
+          "default": "**/node_modules/**",
+          "markdownDescription": "Glob pattern to exclude paths from test file search. Default is `**/node_modules/**`."
+        },
+        "extesterRunner.outFolder": {
+          "type": "string",
+          "default": "out",
+          "markdownDescription": "Out folder. Default is `out`."
+        },
+        "extesterRunner.additionalArgs": {
+          "type": "array",
+          "markdownDescription": "Additional arguments for ExTester `setup-and-run` command.\n\nSee [ExTetser wiki](https://github.com/redhat-developer/vscode-extension-tester/wiki/Test-Setup#set-up-and-run-tests) for more info about all available arguments.",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "extester-runner.collapseAll",
+        "title": "Collapse All",
+        "icon": "$(collapse-all)",
+        "tooltip": "Collapse all items in tree."
+      },
+      {
+        "command": "extester-runner.refreshTests",
+        "title": "Refresh Tests",
+        "icon": "$(refresh)",
+        "tooltip": "Refresh list of tests."
+      },
+      {
+        "command": "extester-runner.runFile",
+        "icon": "$(play)",
+        "title": "Run File",
+        "tooltip": "Run specific test file."
+      },
+      {
+        "command": "extester-runner.runAll",
+        "title": "Run All Tests",
+        "icon": "$(run-all)",
+        "tooltip": "Run all tests in workspace."
+      },
+      {
+        "command": "extester-runner.runFolder",
+        "icon": "$(run-below)",
+        "title": "Run Folder",
+        "tooltip": "Run all test files inside folder."
+      },
+      {
+        "command": "extester-runner.searchFiles",
+        "title": "Search In ExTester Tree",
+        "icon": "$(search)",
+        "tooltip": "Search for files or folders in the ExTester tree view."
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "extesterRunner",
+          "title": "ExTester Runner",
+          "icon": "resources/logo.png"
+        }
+      ]
+    },
+    "views": {
+      "extesterRunner": [
+        {
+          "id": "extesterView",
+          "name": "Test Explorer"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "extester-runner.refreshTests",
+          "when": "view == extesterView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "extester-runner.runAll",
+          "when": "view == extesterView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "extester-runner.collapseAll",
+          "when": "view == extesterView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "extester-runner.searchFiles",
+          "when": "view == extesterView",
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "extester-runner.runFolder",
+          "when": "viewItem == folder",
+          "group": "inline"
+        },
+        {
+          "command": "extester-runner.runFile",
+          "when": "viewItem == file",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/babel__traverse": "^7.20.6",
+    "@types/mocha": "^10.0.9",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.96.0",
+    "@typescript-eslint/eslint-plugin": "^8.10.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "esbuild": "^0.24.0",
+    "eslint": "^9.13.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.26.7",
+    "@babel/traverse": "^7.26.7",
+    "@babel/types": "^7.26.7"
+  }
+}
