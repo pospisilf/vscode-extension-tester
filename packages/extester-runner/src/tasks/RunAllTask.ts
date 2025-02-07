@@ -9,7 +9,7 @@ export class RunAllTestsTask extends TestRunner {
         const workspaceFolder = workspace.workspaceFolders?.[0]?.uri.fsPath || '';
         const outputPath = `${workspaceFolder}/${outputFolder}/**/*.test.js`;
 
-        const shellExecution = new ShellExecution(`npx extest setup-and-run ${outputPath} ${additionalArgs.join(' ')}`);
+        const shellExecution = new ShellExecution(`npx extest setup-and-run ${additionalArgs.join(' ')} ${outputPath}`);
         super(TaskScope.Workspace, 'Run All Tests', shellExecution);
     }
 }
