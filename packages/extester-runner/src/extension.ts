@@ -205,7 +205,15 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 			let folders = Array.from(folderMap.keys()).map((folder) => {
 				const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
 				const folderPath = path.join(workspaceFolder, folder);
-				return new TreeItem(folder, vscode.TreeItemCollapsibleState.Collapsed, true, undefined, undefined, folderPath);
+
+				const configuration = vscode.workspace.getConfiguration('extesterRunner');
+				const ignorePathPart = configuration.get<string>('ignorePathPart') || '';
+				const displayName = folder.startsWith(ignorePathPart) ? folder.substring(ignorePathPart.length) : folder;
+
+				const treeItem = new TreeItem(displayName, vscode.TreeItemCollapsibleState.Collapsed, true, undefined, undefined, folderPath);
+
+    			treeItem.id = folder; // store the actual folder name for lookup
+				return treeItem;
 			});
 
 			// Apply search filter to folders
@@ -223,8 +231,9 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 		} else if (element.isFolder && typeof element.label === 'string') {
 			// Return files inside a folder
+			const actualFolderName = element.id || element.label; // if display name is not same
 			const folderMap = this.groupFilesByFolder();
-			const files = folderMap.get(element.label) || [];
+			const files = folderMap.get(actualFolderName) || [];
 			const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
 			const query = this.searchQuery || ''; // Provide a default value for searchQuery
 			let fileItems = files.map((file) =>
@@ -232,7 +241,7 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 					file,
 					vscode.TreeItemCollapsibleState.Collapsed,
 					false,
-					path.join(workspaceFolder, element.label as string, file)
+					path.join(workspaceFolder, actualFolderName, file)
 				)
 			);
 
