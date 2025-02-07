@@ -9,7 +9,7 @@ export class RunFileTask extends TestRunner {
         const outputPath = file
         .replace(/src\//, `${outputFolder}/`) // replace 'src/' with the output folder
         .replace(/\.ts$/, '.js'); // replace '.ts' with '.js'
-        const shellExecution = new ShellExecution(`npx extest setup-and-run ${outputPath} ${additionalArgs.join(' ')}`);
+        const shellExecution = new ShellExecution(`npx extest setup-and-run ${additionalArgs.join(' ')} ${outputPath}`);
         super(TaskScope.Workspace, 'Run Test File', shellExecution);
     }
 }

@@ -7,7 +7,7 @@ export class RunFolderTask extends TestRunner {
         const additionalArgs: string[] = configuration.get<string[]>('additionalArgs', []);
         const outputFolder = configuration.get<string>('outFolder') || 'out';
         const outputPath = folder.replace(/src\//, `${outputFolder}/`) + '/**/*.test.js';
-        const shellExecution = new ShellExecution(`npx extest setup-and-run ${outputPath} ${additionalArgs.join(' ')}`);
+        const shellExecution = new ShellExecution(`npx extest setup-and-run ${additionalArgs.join(' ')} ${outputPath}`);
         super(TaskScope.Workspace, 'Run Test Folder', shellExecution);
     }
 }
