@@ -70,6 +70,10 @@
           "default": "out",
           "markdownDescription": "Out folder. Default is `out`."
         },
+        "extesterRunner.ignorePathPart": {
+          "type": "string",
+          "markdownDescription": "Pattern to hide specific parts of folders paths in the view. Matching segments will be removed from displayed paths."
+        },
         "extesterRunner.additionalArgs": {
           "type": "array",
           "markdownDescription": "Additional arguments for ExTester `setup-and-run` command.\n\nSee [ExTetser wiki](https://github.com/redhat-developer/vscode-extension-tester/wiki/Test-Setup#set-up-and-run-tests) for more info about all available arguments.",
