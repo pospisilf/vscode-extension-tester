@@ -123,8 +123,16 @@ interface TestBlock {
 	filePath: string;
 	line: number;
 	modifier: string | null; // skip/only
-	its: { name: string; filePath: string, modifier: string | null; line: number }[]; // individual tests inside
+	its: ItBlock[];
 	children: TestBlock[];
+}
+
+interface ItBlock {
+	name: string;
+	filePath: string;
+	line: number;
+	modifier?: string | null;
+	describeModifier?: string | null;
 }
 
 // TreeItem
@@ -454,13 +462,17 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 					? describeArg.value
 					: "Unnamed Describe";
 
+				// Inherit modifier from parent describe if not explicitly set
+				const parentDescribeModifier = stack.length > 0 ? stack[stack.length - 1].modifier : null;
+				const effectiveModifier = modifier || parentDescribeModifier;
+
 				const newDescribeBlock: TestBlock = {
 					describe: describeName,
 					filePath: uri.fsPath, // maybe this could be handled differently?
 					line: line,
 					its: [],
 					children: [], // nested describes
-					modifier: modifier
+					modifier: effectiveModifier
 				};
 
 				// add to parent block's children or root structure
@@ -479,11 +491,13 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 			if (functionName === "it") {
 				const itArg = path.node.arguments[0];
 				const itName = t.isStringLiteral(itArg) ? itArg.value : "Unnamed It";
+				
+				const effectiveModifier = modifier ?? (stack.length > 0 ? stack[stack.length - 1].modifier : null);
 
 				const itBlock = {
 					name: itName,
 					filePath: uri.fsPath, // maybe this could be handled differently?
-					modifier: modifier,
+					modifier: effectiveModifier,
 					line: line,
 				};
 
