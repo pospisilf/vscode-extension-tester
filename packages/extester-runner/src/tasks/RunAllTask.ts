@@ -8,8 +8,10 @@ export class RunAllTestsTask extends TestRunner {
         const outputFolder = configuration.get<string>('outFolder') || 'out'; // tady to out je potreba nejak poladit! 
         const workspaceFolder = workspace.workspaceFolders?.[0]?.uri.fsPath || '';
         const outputPath = `${workspaceFolder}/${outputFolder}/**/*.test.js`;
-
-        const shellExecution = new ShellExecution(`npx extest setup-and-run ${additionalArgs.join(' ')} ${outputPath}`);
+        const vsCodeVersion = configuration.get<string>('vsCodeVersion');
+        const versionArg = vsCodeVersion ? `--code_version ${vsCodeVersion}` : '';
+        const vsCodeType = configuration.get<string>('vsCodeType');
+        const shellExecution = new ShellExecution(`npx extest setup-and-run ${versionArg} ${vsCodeType} ${additionalArgs.join(' ')} ${outputPath}`);
         super(TaskScope.Workspace, 'Run All Tests', shellExecution);
     }
 }
