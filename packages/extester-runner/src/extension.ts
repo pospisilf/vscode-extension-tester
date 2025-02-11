@@ -122,7 +122,8 @@ interface TestBlock {
 	describe: string;
 	filePath: string;
 	line: number;
-	modifier: string | null; // skip/only
+	modifier?: string | null; // skip/only
+	parentModifier?: string | null; // skip/only
 	its: ItBlock[];
 	children: TestBlock[];
 }
@@ -131,7 +132,8 @@ interface ItBlock {
 	name: string;
 	filePath: string;
 	line: number;
-	modifier?: string | null;
+	modifier?: string | null; // skip/only
+	parentModifier?: string | null; // skip/only
 	describeModifier?: string | null;
 }
 
@@ -344,24 +346,23 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	private convertTestBlocksToTreeItems(testBlocks: TestBlock[]): TreeItem[] {
 		return testBlocks.map((block) => {
-
-			// Determine the icon for the `describe` block based on its modifier
-			// const describeIcon = block.modifier
-			//   ? new vscode.ThemeIcon(block.modifier === 'only' ? 'bracket-dot' : 'bracket-error')
-			//   : new vscode.ThemeIcon('bracket');
-
 			let describeIcon;
-			if (block.modifier) {
-				if (block.modifier === 'only') {
-					describeIcon = new vscode.ThemeIcon('bracket-dot', new vscode.ThemeColor('extesterrunner.only'));
-				} else {
-					describeIcon = new vscode.ThemeIcon('bracket-error', new vscode.ThemeColor('extesterrunner.skip'));
-				}
+
+			const getThemeIcon = (modifier?: string) => {
+				return modifier === 'only'
+					? new vscode.ThemeIcon('bracket-dot', new vscode.ThemeColor('extesterrunner.only'))
+					: new vscode.ThemeIcon('bracket-error', new vscode.ThemeColor('extesterrunner.skip'));
+			};
+
+			const modifier = block.modifier ?? undefined;
+			const parentModifier = block.parentModifier ?? undefined;
+			
+			if (modifier || parentModifier) {
+				describeIcon = modifier ? getThemeIcon(modifier) : getThemeIcon(parentModifier);
 			} else {
 				describeIcon = new vscode.ThemeIcon('bracket');
 			}
-
-
+			
 			// create a TreeItem for the `describe` block
 			const describeItem = new TreeItem(
 				`${block.describe} ${block.modifier ? `[${block.modifier}]` : ''}`,
@@ -384,11 +385,19 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 			// create TreeItems for `its` inside this `describe` block
 			const itItems = block.its.map((it) => {
+				let itIcon;
+				
+				const getItIcon = (modifier?: string) => {
+					return modifier === 'only'
+						? new vscode.ThemeIcon('variable', new vscode.ThemeColor('extesterrunner.only'))
+						: new vscode.ThemeIcon('variable', new vscode.ThemeColor('extesterrunner.skip'));
+				};
 
-				const itIcon = it.modifier
-					? new vscode.ThemeIcon('variable', it.modifier === 'only' ? new vscode.ThemeColor('extesterrunner.only') : new vscode.ThemeColor('extesterrunner.skip'))
-					: new vscode.ThemeIcon('variable');
-
+				const modifier = it.modifier ?? undefined;
+				const parentModifier = it.parentModifier ?? undefined;
+				
+				itIcon = modifier || parentModifier ? getItIcon(modifier ?? parentModifier) : new vscode.ThemeIcon('bracket');
+			
 				const itItem = new TreeItem(
 					`${it.name} ${it.modifier ? `[${it.modifier}]` : ''}`,
 					vscode.TreeItemCollapsibleState.None,
@@ -462,9 +471,11 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 					? describeArg.value
 					: "Unnamed Describe";
 
-				// Inherit modifier from parent describe if not explicitly set
-				const parentDescribeModifier = stack.length > 0 ? stack[stack.length - 1].modifier : null;
-				const effectiveModifier = modifier || parentDescribeModifier;
+				const lastElement = stack.length > 0 ? stack[stack.length - 1] : null;
+				let parentDescribeModifier;
+
+				// Assign modifier, prioritizing the element's own modifier over its parent's
+				parentDescribeModifier = lastElement?.modifier ?? lastElement?.parentModifier;
 
 				const newDescribeBlock: TestBlock = {
 					describe: describeName,
@@ -472,7 +483,8 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 					line: line,
 					its: [],
 					children: [], // nested describes
-					modifier: effectiveModifier
+					modifier: modifier,
+					parentModifier: parentDescribeModifier
 				};
 
 				// add to parent block's children or root structure
@@ -491,13 +503,18 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 			if (functionName === "it") {
 				const itArg = path.node.arguments[0];
 				const itName = t.isStringLiteral(itArg) ? itArg.value : "Unnamed It";
-				
-				const effectiveModifier = modifier ?? (stack.length > 0 ? stack[stack.length - 1].modifier : null);
+
+				const lastElement = stack.length > 0 ? stack[stack.length - 1] : null;
+				let parentDescribeModifier;		
+		
+				// Assign modifier, prioritizing the element's own modifier over its parent's
+				parentDescribeModifier = lastElement?.modifier ?? lastElement?.parentModifier;
 
 				const itBlock = {
 					name: itName,
 					filePath: uri.fsPath, // maybe this could be handled differently?
-					modifier: effectiveModifier,
+					modifier: modifier,
+					parentModifier: parentDescribeModifier,
 					line: line,
 				};
 
