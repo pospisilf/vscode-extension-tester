@@ -7,7 +7,6 @@ import { RunAllTestsTask } from './tasks/RunAllTask';
 import { RunFileTask } from './tasks/RunFileTask';
 
 export function activate(context: vscode.ExtensionContext) {
-
 	// register view
 	const treeDataProvider = new ExtesterTreeProvider();
 	vscode.window.registerTreeDataProvider('extesterView', treeDataProvider);
@@ -17,44 +16,42 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.refreshTests', async () => {
 			treeDataProvider.refresh();
-		})
+		}),
 	);
 
 	// collapse all
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.collapseAll', async () => {
 			vscode.commands.executeCommand('workbench.actions.treeView.extesterView.collapseAll');
-		})
+		}),
 	);
 
 	// utils
 	// open specific file in editor on position if defined
 	context.subscriptions.push(
-		vscode.commands.registerCommand(
-			'extesterRunner.openTestItem',
-			async (filePath: string, lineNumber?: number) => {
-				if (filePath) {
-					try {
-						const document = await vscode.workspace.openTextDocument(filePath);
-						const editor = await vscode.window.showTextDocument(document);
+		vscode.commands.registerCommand('extesterRunner.openTestItem', async (filePath: string, lineNumber?: number) => {
+			if (filePath) {
+				try {
+					const document = await vscode.workspace.openTextDocument(filePath);
+					const editor = await vscode.window.showTextDocument(document);
 
-						const position = lineNumber !== undefined
+					const position =
+						lineNumber !== undefined
 							? new vscode.Position(lineNumber - 1, 0) // convert to 0-based index
 							: new vscode.Position(0, 0);
 
-						const range = new vscode.Range(position, position);
-						editor.revealRange(range, vscode.TextEditorRevealType.InCenter); // center the line in the editor
-						editor.selection = new vscode.Selection(position, position); // set the cursor to the line
-					} catch (error) {
-						vscode.window.showErrorMessage(`Failed to open file: ${error}`);
-					}
+					const range = new vscode.Range(position, position);
+					editor.revealRange(range, vscode.TextEditorRevealType.InCenter); // center the line in the editor
+					editor.selection = new vscode.Selection(position, position); // set the cursor to the line
+				} catch (error) {
+					vscode.window.showErrorMessage(`Failed to open file: ${error}`);
 				}
 			}
-		)
+		}),
 	);
 
 	// refresh on create, delete and change
-	const watcher = vscode.workspace.createFileSystemWatcher("**/*");
+	const watcher = vscode.workspace.createFileSystemWatcher('**/*');
 
 	watcher.onDidCreate((uri) => {
 		console.log(`File created: ${uri.fsPath}`);
@@ -73,14 +70,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(watcher);
 
-
 	// Run commands
 	// Run all
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.runAll', async () => {
 			const task = new RunAllTestsTask();
 			await task.execute();
-		})
+		}),
 	);
 
 	// Run folder
@@ -88,7 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('extester-runner.runFolder', async (item: TreeItem) => {
 			const task = new RunFileTask(item.folderPath as string);
 			await task.execute();
-		})
+		}),
 	);
 
 	// Run file
@@ -96,14 +92,12 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('extester-runner.runFile', async (item: TreeItem) => {
 			const task = new RunFileTask(item.filePath as string);
 			await task.execute();
-		})
+		}),
 	);
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {
-
-}
+export function deactivate() {}
 
 // Test Block
 interface TestBlock {
@@ -137,15 +131,13 @@ class TreeItem extends vscode.TreeItem {
 		public isFolder: boolean,
 		public filePath?: string,
 		lineNumber?: number,
-		folderPath?: string
+		folderPath?: string,
 	) {
 		super(label, collapsibleState);
 		this.lineNumber = lineNumber;
 		this.folderPath = folderPath;
 
-		this.iconPath = isFolder
-			? new vscode.ThemeIcon('folder')
-			: new vscode.ThemeIcon('file');
+		this.iconPath = isFolder ? new vscode.ThemeIcon('folder') : new vscode.ThemeIcon('file');
 
 		this.contextValue = isFolder ? 'folder' : 'file';
 
@@ -163,10 +155,8 @@ class TreeItem extends vscode.TreeItem {
 
 class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 	// event emitter to signal when the tree data needs to be refreshed
-	private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined | void> =
-		new vscode.EventEmitter<TreeItem | undefined | void>();
-	readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined | void> =
-		this._onDidChangeTreeData.event;
+	private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined | void> = new vscode.EventEmitter<TreeItem | undefined | void>();
+	readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event;
 
 	private files: vscode.Uri[] = []; // stores test files found in the workspace
 	private parsedFiles: Map<string, TestBlock[]> = new Map(); // cache for parsed file contents
@@ -202,7 +192,7 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 				const treeItem = new TreeItem(displayName, vscode.TreeItemCollapsibleState.Collapsed, true, undefined, undefined, folderPath);
 
-    			treeItem.id = folder; // store the actual folder name for lookup
+				treeItem.id = folder; // store the actual folder name for lookup
 				return treeItem;
 			});
 
@@ -212,20 +202,14 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 				const labelB = typeof b.label === 'string' ? b.label : b.label?.label || '';
 				return labelA.localeCompare(labelB);
 			});
-
 		} else if (element.isFolder && typeof element.label === 'string') {
 			// Return files inside a folder
 			const actualFolderName = element.id || element.label; // if display name is not same
 			const folderMap = this.groupFilesByFolder();
 			const files = folderMap.get(actualFolderName) || [];
 			const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
-			let fileItems = files.map((file) =>
-				new TreeItem(
-					file,
-					vscode.TreeItemCollapsibleState.Collapsed,
-					false,
-					path.join(workspaceFolder, actualFolderName, file)
-				)
+			let fileItems = files.map(
+				(file) => new TreeItem(file, vscode.TreeItemCollapsibleState.Collapsed, false, path.join(workspaceFolder, actualFolderName, file)),
 			);
 
 			// Sort files alphabetically
@@ -323,20 +307,20 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 			const modifier = block.modifier ?? undefined;
 			const parentModifier = block.parentModifier ?? undefined;
-			
+
 			if (modifier || parentModifier) {
 				describeIcon = modifier ? getThemeIcon(modifier) : getThemeIcon(parentModifier);
 			} else {
 				describeIcon = new vscode.ThemeIcon('bracket');
 			}
-			
+
 			// create a TreeItem for the `describe` block
 			const describeItem = new TreeItem(
 				`${block.describe} ${block.modifier ? `[${block.modifier}]` : ''}`,
 				vscode.TreeItemCollapsibleState.Collapsed,
 				false,
 				undefined, // no file path for `describe` -> if provided, parser will end up in parsing same describe forever! TODO: find out WHY
-				block.line // pass the line number
+				block.line, // pass the line number
 			);
 
 			// describe parameters in tree view
@@ -353,7 +337,7 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 			// create TreeItems for `its` inside this `describe` block
 			const itItems = block.its.map((it) => {
 				let itIcon;
-				
+
 				const getItIcon = (modifier?: string) => {
 					return modifier === 'only'
 						? new vscode.ThemeIcon('variable', new vscode.ThemeColor('extesterrunner.only'))
@@ -362,15 +346,15 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 				const modifier = it.modifier ?? undefined;
 				const parentModifier = it.parentModifier ?? undefined;
-				
+
 				itIcon = modifier || parentModifier ? getItIcon(modifier ?? parentModifier) : new vscode.ThemeIcon('bracket');
-			
+
 				const itItem = new TreeItem(
 					`${it.name} ${it.modifier ? `[${it.modifier}]` : ''}`,
 					vscode.TreeItemCollapsibleState.None,
 					false,
 					undefined, // no file path for `it`
-					it.line // pass the line number
+					it.line, // pass the line number
 				);
 
 				// it parameters in tree view
@@ -403,8 +387,8 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 	const content = document.getText();
 
 	const ast = parse(content, {
-		sourceType: "module",
-		plugins: ["typescript"], // handle TypeScript-specific syntax
+		sourceType: 'module',
+		plugins: ['typescript'], // handle TypeScript-specific syntax
 	});
 
 	const testStructure: TestBlock[] = []; // root structure
@@ -432,11 +416,9 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 			const line = path.node.loc?.start.line || 0;
 
 			// handle `describe` blocks
-			if (functionName === "describe") {
+			if (functionName === 'describe') {
 				const describeArg = path.node.arguments[0];
-				const describeName = t.isStringLiteral(describeArg)
-					? describeArg.value
-					: "Unnamed Describe";
+				const describeName = t.isStringLiteral(describeArg) ? describeArg.value : 'Unnamed Describe';
 
 				const lastElement = stack.length > 0 ? stack[stack.length - 1] : null;
 				let parentDescribeModifier;
@@ -451,7 +433,7 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 					its: [],
 					children: [], // nested describes
 					modifier: modifier,
-					parentModifier: parentDescribeModifier
+					parentModifier: parentDescribeModifier,
 				};
 
 				// add to parent block's children or root structure
@@ -467,13 +449,13 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 			}
 
 			// handle `it` blocks
-			if (functionName === "it") {
+			if (functionName === 'it') {
 				const itArg = path.node.arguments[0];
-				const itName = t.isStringLiteral(itArg) ? itArg.value : "Unnamed It";
+				const itName = t.isStringLiteral(itArg) ? itArg.value : 'Unnamed It';
 
 				const lastElement = stack.length > 0 ? stack[stack.length - 1] : null;
-				let parentDescribeModifier;		
-		
+				let parentDescribeModifier;
+
 				// Assign modifier, prioritizing the element's own modifier over its parent's
 				parentDescribeModifier = lastElement?.modifier ?? lastElement?.parentModifier;
 
@@ -508,7 +490,7 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 					}
 				}
 
-				if (functionName === "describe") {
+				if (functionName === 'describe') {
 					stack.pop(); // pop the current `describe` block from the stack
 				}
 			}
