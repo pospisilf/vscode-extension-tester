@@ -11,7 +11,7 @@
     "directory": "packages/extester-runner"
   },
   "license": "Apache-2.0",
-  "version": "0.0.52",
+  "version": "0.0.55",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -169,12 +169,12 @@
       "view/item/context": [
         {
           "command": "extester-runner.runFolder",
-          "when": "viewItem == folder",
+          "when": "view == extesterView && viewItem == folder",
           "group": "inline"
         },
         {
           "command": "extester-runner.runFile",
-          "when": "viewItem == file",
+          "when": "view == extesterView && viewItem == file",
           "group": "inline"
         }
       ]
