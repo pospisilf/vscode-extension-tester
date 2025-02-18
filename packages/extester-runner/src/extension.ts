@@ -160,18 +160,29 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	private files: vscode.Uri[] = []; // stores test files found in the workspace
 	private parsedFiles: Map<string, TestBlock[]> = new Map(); // cache for parsed file contents
+	private hasTestFiles: boolean = false; // flag to track if any test files are found
 
 	constructor() {
 		this.refresh(); // load initial data
 	}
 
 	// trigger a refresh of the tree view
-	refresh(): void {
+	async refresh(): Promise<void> {
 		this.parsedFiles.clear();
-		this._onDidChangeTreeData.fire(); // notify VS Code to update the tree
-		this.findTestFiles(); // search for test files in the workspace
-	}
+		this.files = []; // Reset file list
 
+		await this.findTestFiles(); // search for test files in the workspace
+		
+		console.log(`Setting context extesterRunner.hasTestFiles = ${this.hasTestFiles}`); // Debugging
+		await vscode.commands.executeCommand('setContext', 'extesterRunner.hasTestFiles', this.hasTestFiles);
+	
+		this._onDidChangeTreeData.fire(); // Refresh UI
+	
+		// Force UI update after a slight delay to ensure state is applied
+		setTimeout(() => {
+			vscode.commands.executeCommand('setContext', 'extesterRunner.hasTestFiles', this.hasTestFiles);
+		}, 100);
+	}
 	// get a tree item to render in the tree view
 	getTreeItem(element: TreeItem): vscode.TreeItem {
 		return element;
@@ -180,6 +191,15 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 	// get children for a given tree item
 	async getChildren(element?: TreeItem): Promise<TreeItem[]> {
 		if (!element) {
+
+			if (!this.hasTestFiles) {
+				// No test files found, show a placeholder message
+				const noFilesItem = new TreeItem("No test files found", vscode.TreeItemCollapsibleState.None, false);
+				noFilesItem.contextValue = "noFiles"; // Custom context to disable actions
+				noFilesItem.iconPath = new vscode.ThemeIcon("warning");
+				return [noFilesItem];
+			}
+
 			// Return top-level folders
 			const folderMap = this.groupFilesByFolder();
 			let folders = Array.from(folderMap.keys()).map((folder) => {
@@ -239,8 +259,14 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 			// use the settings in findFiles
 			const files = await vscode.workspace.findFiles(testFileGlob, excludeGlob);
-			this.files = files; // store the found files
-			this._onDidChangeTreeData.fire(); // notify the tree view to refresh
+			this.files = files; // Store the found files
+
+			console.log(`Found test files: ${this.files.length}`); // Debugging
+
+			this.hasTestFiles = this.files.length > 0; // Ensure `hasTestFiles` is updated
+	
+			// Only refresh the tree after updating the state
+			this._onDidChangeTreeData.fire();
 		} catch (error) {
 			// handle any errors that occur during file search
 			if (error instanceof Error) {
