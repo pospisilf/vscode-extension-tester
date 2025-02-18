@@ -157,7 +157,7 @@
         },
         {
           "command": "extester-runner.runAll",
-          "when": "view == extesterView",
+          "when": "view == extesterView && extesterRunner.hasTestFiles",
           "group": "navigation@2"
         },
         {
