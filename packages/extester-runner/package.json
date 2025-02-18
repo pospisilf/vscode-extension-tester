@@ -86,7 +86,7 @@
         },
         "extesterRunner.vsCodeVersion": {
           "type": "string",
-          "description": "Specify the VS Code version to use."
+          "description": "Specify the VS Code Version to use."
         },
         "extesterRunner.vsCodeType": {
           "type": "string",
@@ -95,7 +95,7 @@
             "insider"
           ],
           "default": "stable",
-          "description": "Select the type of VS Code."
+          "description": "Select the VS Code Type to use."
         }
       }
     },
