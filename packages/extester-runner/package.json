@@ -11,7 +11,7 @@
     "directory": "packages/extester-runner"
   },
   "license": "Apache-2.0",
-  "version": "0.0.49",
+  "version": "0.0.52",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -129,12 +129,6 @@
         "icon": "$(run-below)",
         "title": "Run Folder",
         "tooltip": "Run all test files inside folder."
-      },
-      {
-        "command": "extester-runner.searchFiles",
-        "title": "Search In ExTester Tree",
-        "icon": "$(search)",
-        "tooltip": "Search for files or folders in the ExTester tree view."
       }
     ],
     "viewsContainers": {
@@ -170,11 +164,6 @@
           "command": "extester-runner.collapseAll",
           "when": "view == extesterView",
           "group": "navigation@3"
-        },
-        {
-          "command": "extester-runner.searchFiles",
-          "when": "view == extesterView",
-          "group": "navigation@4"
         }
       ],
       "view/item/context": [
