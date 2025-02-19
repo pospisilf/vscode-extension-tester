@@ -87,7 +87,7 @@
         "extesterRunner.vsCodeVersion": {
           "type": "string",
           "title": "abrakadabra",
-          "markdownDescription": "Specify the VS Code version options: `max`, `min`, `latest`, or custom (e.g., `1.97.1`). The default is `latest` (indicating the most recent stable release).",
+          "markdownDescription": "Specify the VS Code version options: `max`, `min`, `latest`, or custom (e.g., `1.97.1`). The default is `latest` (indicating the most recent release).",
           "default": "latest"
         },
         "extesterRunner.vsCodeType": {
@@ -97,7 +97,7 @@
             "insider"
           ],
           "default": "stable",
-          "description": "Select the VS Code Type to use."
+          "markdownDescription": " Use `stable` (default) for the official, fully tested release with monthly updates for reliability or `insider` for a preview version with daily updates and experimental features, potentially unstable."
         }
       }
     },
