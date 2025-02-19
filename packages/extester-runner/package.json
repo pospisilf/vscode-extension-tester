@@ -58,8 +58,8 @@
       "properties": {
         "extesterRunner.testFileGlob": {
           "type": "string",
-          "default": "**/*.test.ts",
-          "markdownDescription": "Glob pattern to find test files in the workspace. Default is `**/*.test.ts`."
+          "default": "**/ui-tests/**/*.test.ts",
+          "markdownDescription": "Glob pattern to find test files in the workspace. Default is `**/ui-tests/**/*.test.ts`."
         },
         "extesterRunner.excludeGlob": {
           "type": "string",
