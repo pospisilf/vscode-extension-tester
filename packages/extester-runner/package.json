@@ -86,7 +86,9 @@
         },
         "extesterRunner.vsCodeVersion": {
           "type": "string",
-          "description": "Specify the VS Code Version to use."
+          "title": "abrakadabra",
+          "markdownDescription": "Specify the VS Code version options: `max`, `min`, `latest`, or custom (e.g., `1.97.1`). The default is `latest` (indicating the most recent stable release).",
+          "default": "latest"
         },
         "extesterRunner.vsCodeType": {
           "type": "string",
