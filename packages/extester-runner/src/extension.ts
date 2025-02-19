@@ -7,6 +7,23 @@ import { RunAllTestsTask } from './tasks/RunAllTask';
 import { RunFileTask } from './tasks/RunFileTask';
 
 export function activate(context: vscode.ExtensionContext) {
+	// Create an output channel for logging
+    const outputChannel = vscode.window.createOutputChannel('ExTester Runner');
+
+	function logInfo(message: string) {
+        outputChannel.appendLine(`[INFO] ${message}`);
+    }
+    
+    function logDebug(message: string) {
+        outputChannel.appendLine(`[DEBUG] ${message}`);
+    }
+    
+    function logError(message: string) {
+        outputChannel.appendLine(`[ERROR] ${message}`);
+    }
+
+    logInfo('Activating ExTester Runner extension...');
+	
 	// register view
 	const treeDataProvider = new ExtesterTreeProvider();
 	vscode.window.registerTreeDataProvider('extesterView', treeDataProvider);
@@ -94,10 +111,16 @@ export function activate(context: vscode.ExtensionContext) {
 			await task.execute();
 		}),
 	);
+
+	logDebug('test');
+	logError('test');
+	logInfo('ExTester Runner extension activated successfully.');
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+	vscode.window.createOutputChannel('ExTester Runner').dispose();
+}
 
 // Test Block
 interface TestBlock {
