@@ -73,8 +73,7 @@
         },
         "extesterRunner.ignorePathPart": {
           "type": "string",
-          "default": "src/tests/",
-          "markdownDescription": "Pattern to hide specific parts of folders paths in the view. Matching segments will be removed from displayed paths. Default is `src/tests/`."
+          "markdownDescription": "Pattern to hide specific parts of folders paths in the view. Matching segments will be removed from displayed paths."
         },
         "extesterRunner.additionalArgs": {
           "type": "array",
