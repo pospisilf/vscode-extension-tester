@@ -69,7 +69,7 @@
         "extesterRunner.outFolder": {
           "type": "string",
           "default": "out",
-          "markdownDescription": "Specifies the output folder where generated test results and artifacts will be stored. Default is `out`."
+          "markdownEnumDescriptions": "Specifies the output folder where compiled source files `(*.js)` of test files are stored. Default is `out`."
         },
         "extesterRunner.ignorePathPart": {
           "type": "string",
