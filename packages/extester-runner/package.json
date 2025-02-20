@@ -72,7 +72,7 @@
           "type": "string",
           "default": "out",
           "scope": "resource",
-          "markdownEnumDescriptions": "Specifies the output folder where compiled source files `(*.js)` of test files are stored. Default is `out`."
+          "markdownDescription": "Specifies the output folder where compiled source files `(*.js)` of test files are stored. Default is `out`."
         },
         "extesterRunner.ignorePathPart": {
           "type": "string",
