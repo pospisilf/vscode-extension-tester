@@ -6,13 +6,16 @@ import { ShellExecution, Task, TaskDefinition, tasks, TaskScope, WorkspaceFolder
 export abstract class TestRunner extends Task {
 	protected label: string;
 
+	// https://code.visualstudio.com/api/references/vscode-api#TaskPresentationOptions
 	constructor(scope: WorkspaceFolder | TaskScope.Workspace, label: string, shellExecution: ShellExecution) {
+		
 		const taskDefinition: TaskDefinition = {
 			label: label,
 			type: 'shell',
 		};
 
 		super(taskDefinition, scope, label, 'extester-runner', shellExecution);
+		this.presentationOptions.clear = true;
 		this.label = label;
 	}
 
