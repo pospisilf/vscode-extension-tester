@@ -11,7 +11,7 @@
     "directory": "packages/extester-runner"
   },
   "license": "Apache-2.0",
-  "version": "0.0.60",
+  "version": "0.0.61",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -59,16 +59,19 @@
         "extesterRunner.testFileGlob": {
           "type": "string",
           "default": "**/ui-tests/**/*.test.ts",
+          "scope": "resource",
           "markdownDescription": "Glob pattern to find test files in the workspace. Default is `**/ui-tests/**/*.test.ts`."
         },
         "extesterRunner.excludeGlob": {
           "type": "string",
           "default": "**/node_modules/**",
+          "scope": "resource",
           "markdownDescription": "Glob pattern to exclude paths from test file search. Default is `**/node_modules/**`."
         },
         "extesterRunner.outFolder": {
           "type": "string",
           "default": "out",
+          "scope": "resource",
           "markdownEnumDescriptions": "Specifies the output folder where compiled source files `(*.js)` of test files are stored. Default is `out`."
         },
         "extesterRunner.ignorePathPart": {
@@ -79,15 +82,16 @@
           "type": "array",
           "markdownDescription": "Additional arguments for ExTester `setup-and-run` command.\n\nSee [ExTester wiki](https://github.com/redhat-developer/vscode-extension-tester/wiki/Test-Setup#set-up-and-run-tests) for more info about all available arguments.",
           "default": [],
+          "scope": "resource",
           "items": {
             "type": "string"
           }
         },
         "extesterRunner.vsCodeVersion": {
           "type": "string",
-          "title": "abrakadabra",
-          "markdownDescription": "Specify the VS Code version options: `max`, `min`, `latest`, or custom (e.g., `1.97.1`). The default is `latest` (indicating the most recent release).",
-          "default": "latest"
+          "default": "latest",
+          "scope": "resource",
+          "markdownDescription": "Specify the VS Code version options: `max`, `min`, `latest`, or custom (e.g., `1.97.1`). The default is `latest` (indicating the most recent release)."
         },
         "extesterRunner.vsCodeType": {
           "type": "string",
@@ -96,6 +100,7 @@
             "insider"
           ],
           "default": "stable",
+          "scope": "resource",
           "markdownDescription": " Use `stable` (default) for the official, fully tested release with monthly updates for reliability or `insider` for a preview version with daily updates and experimental features, potentially unstable."
         }
       }
