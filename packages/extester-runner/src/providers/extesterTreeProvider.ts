@@ -190,86 +190,96 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 	private convertTestBlocksToTreeItems(testBlocks: TestBlock[]): TreeItem[] {
 		return testBlocks.map((block) => {
 			let describeIcon;
-
+	
 			const getThemeIcon = (modifier?: string) => {
 				return modifier === 'only'
 					? new vscode.ThemeIcon('bracket-dot', new vscode.ThemeColor('extesterrunner.only'))
 					: new vscode.ThemeIcon('bracket-error', new vscode.ThemeColor('extesterrunner.skip'));
 			};
-
+	
 			const modifier = block.modifier ?? undefined;
 			const parentModifier = block.parentModifier ?? undefined;
-
+	
 			if (modifier || parentModifier) {
 				describeIcon = modifier ? getThemeIcon(modifier) : getThemeIcon(parentModifier);
 			} else {
 				describeIcon = new vscode.ThemeIcon('bracket');
 			}
-
-			// create a TreeItem for the `describe` block
-			const describeItem = new TreeItem(
-				`${block.describe} ${block.modifier ? `[${block.modifier}]` : ''}`,
-				vscode.TreeItemCollapsibleState.Collapsed,
-				false,
-				undefined, // no file path for `describe` -> if provided, parser will end up in parsing same describe forever! TODO: find out WHY
-				block.line, // pass the line number
-			);
-
-			// describe parameters in tree view
-			describeItem.tooltip = 'describe';
-			describeItem.contextValue = 'describeBlock';
-			describeItem.iconPath = describeIcon;
-
-			describeItem.command = {
-				command: 'extesterRunner.openTestItem',
-				title: 'Open Test Item',
-				arguments: [block.filePath, block.line],
-			};
-
-			// create TreeItems for `its` inside this `describe` block
+	
+			// Recursively process nested `describe` blocks
+			const nestedDescribeItems = this.convertTestBlocksToTreeItems(block.children);
+	
+			// Create TreeItems for `it` tests inside this `describe` block
 			const itItems = block.its.map((it) => {
 				let itIcon;
-
+	
 				const getItIcon = (modifier?: string) => {
 					return modifier === 'only'
 						? new vscode.ThemeIcon('variable', new vscode.ThemeColor('extesterrunner.only'))
 						: new vscode.ThemeIcon('variable', new vscode.ThemeColor('extesterrunner.skip'));
 				};
-
-				const modifier = it.modifier ?? undefined;
-				const parentModifier = it.parentModifier ?? undefined;
-
-				itIcon = modifier || parentModifier ? getItIcon(modifier ?? parentModifier) : new vscode.ThemeIcon('bracket');
-
+	
+				const itModifier = it.modifier ?? undefined;
+				const itParentModifier = it.parentModifier ?? undefined;
+	
+				itIcon = itModifier || itParentModifier ? getItIcon(itModifier ?? itParentModifier) : new vscode.ThemeIcon('bracket');
+	
 				const itItem = new TreeItem(
 					`${it.name} ${it.modifier ? `[${it.modifier}]` : ''}`,
 					vscode.TreeItemCollapsibleState.None,
 					false,
 					undefined, // no file path for `it`
-					it.line, // pass the line number
+					it.line // pass the line number
 				);
-
-				// it parameters in tree view
+	
+				// `it` parameters in tree view
 				itItem.tooltip = 'it';
 				itItem.contextValue = 'itBlock';
 				itItem.iconPath = itIcon;
-
+	
 				itItem.command = {
 					command: 'extesterRunner.openTestItem',
 					title: 'Open Test Item',
 					arguments: [it.filePath, it.line],
 				};
-
+	
 				return itItem;
 			});
-
-			// recursively process nested `describe` blocks
-			const nestedDescribeItems = this.convertTestBlocksToTreeItems(block.children);
-
-			// attach all child items (both `it` blocks and nested `describe` blocks)
+	
+			// Determine collapsible state based on child elements
+			const collapsibleState =
+				nestedDescribeItems.length > 0 || itItems.length > 0
+					? vscode.TreeItemCollapsibleState.Collapsed
+					: vscode.TreeItemCollapsibleState.None;
+	
+			// Create a TreeItem for the `describe` block
+			const describeItem = new TreeItem(
+				`${block.describe} ${block.modifier ? `[${block.modifier}]` : ''}`,
+				collapsibleState,
+				false,
+				undefined, // no file path for `describe` to avoid infinite parsing loop
+				block.line // pass the line number
+			);
+	
+			// `describe` parameters in tree view
+			describeItem.tooltip = 'describe';
+			describeItem.contextValue = 'describeBlock';
+			describeItem.iconPath = describeIcon;
+	
+			describeItem.command = {
+				command: 'extesterRunner.openTestItem',
+				title: 'Open Test Item',
+				arguments: [block.filePath, block.line],
+			};
+	
+			// Attach all child items (both `it` blocks and nested `describe` blocks)
 			describeItem.children = [...itItems, ...nestedDescribeItems];
-
+	
 			return describeItem; // return the fully built TreeItem
 		});
 	}
+	
+
+
+
 }
