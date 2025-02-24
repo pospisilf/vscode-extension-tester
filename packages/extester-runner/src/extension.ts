@@ -475,8 +475,8 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 
 			// handle `describe` blocks
 			if (functionName === 'describe') {
-				const describeArg = path.node.arguments[0];
-				const describeName = t.isStringLiteral(describeArg) ? describeArg.value : 'Unnamed Describe';
+				const firstArg = path.node.arguments[0];
+				const describeName = extractTestName(t.isExpression(firstArg) ? firstArg : undefined, 'Unnamed Describe');
 
 				const lastElement = stack.length > 0 ? stack[stack.length - 1] : null;
 				let parentDescribeModifier;
@@ -509,7 +509,7 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 			// handle `it` blocks
 			if (functionName === 'it') {
 				const itArg = path.node.arguments[0];
-				const itName = t.isStringLiteral(itArg) ? itArg.value : 'Unnamed It';
+				const itName = extractTestName(t.isExpression(itArg) ? itArg : undefined, 'Unnamed It');
 
 				const lastElement = stack.length > 0 ? stack[stack.length - 1] : null;
 				let parentDescribeModifier;
@@ -556,4 +556,28 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 	});
 
 	return testStructure;
+}
+
+function extractTestName(node: t.Expression | undefined, defaultName: string): string {
+    if (t.isStringLiteral(node)) {
+        return node.value; // Regular string
+    } else if (t.isTemplateLiteral(node)) {
+        return node.quasis
+            .map((q, i) => {
+                let text = q.value.cooked ?? ''; // Static text
+                if (node.expressions[i]) {
+                    const expr = node.expressions[i];
+
+                    // If the expression is an identifier (a variable like "foo"), keep its name
+                    if (t.isIdentifier(expr)) {
+                        text += `\${${expr.name}}`;
+                    } else {
+                        text += '${?}'; // Unknown expressions get a placeholder
+                    }
+                }
+                return text;
+            })
+            .join('');
+    }
+    return defaultName; // Fallback
 }
