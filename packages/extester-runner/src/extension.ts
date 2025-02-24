@@ -6,32 +6,45 @@ import * as t from '@babel/types';
 import { RunAllTestsTask } from './tasks/RunAllTask';
 import { RunFileTask } from './tasks/RunFileTask';
 
-export function activate(context: vscode.ExtensionContext) {
-	// Create an output channel for logging
-    const outputChannel = vscode.window.createOutputChannel('ExTester Runner');
+let outputChannel: vscode.OutputChannel; // Declare it but don't initialize yet
 
-	function logInfo(message: string) {
+function logInfo(message: string) {
+    if (outputChannel) {
         outputChannel.appendLine(`[INFO] ${message}`);
     }
-    
-    function logDebug(message: string) {
+}
+
+function logDebug(message: string) {
+    if (outputChannel) {
         outputChannel.appendLine(`[DEBUG] ${message}`);
     }
-    
-    function logError(message: string) {
+}
+
+function logError(message: string) {
+    if (outputChannel) {
         outputChannel.appendLine(`[ERROR] ${message}`);
     }
+}
+
+export function activate(context: vscode.ExtensionContext) {
+	// Create an output channel for logging
+    outputChannel = vscode.window.createOutputChannel('ExTester Runner');
+
+	logError('placeholder');
 
     logInfo('Activating ExTester Runner extension...');
 	
 	// register view
 	const treeDataProvider = new ExtesterTreeProvider();
+	logDebug('Registering tree view');
 	vscode.window.registerTreeDataProvider('extesterView', treeDataProvider);
 
+	logDebug('Registering commands');
 	// tree view commands
 	// refresh
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.refreshTests', async () => {
+			logInfo('User triggered: extester-runner.refreshTests');
 			treeDataProvider.refresh();
 		}),
 	);
@@ -39,6 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// collapse all
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.collapseAll', async () => {
+			logInfo('User triggered: extester-runner.collapseAll');
 			vscode.commands.executeCommand('workbench.actions.treeView.extesterView.collapseAll');
 		}),
 	);
@@ -47,6 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// open specific file in editor on position if defined
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extesterRunner.openTestItem', async (filePath: string, lineNumber?: number) => {
+			logInfo(`User triggered: extester-runner.openTestItem for filePath: ${filePath} on line ${lineNumber}`);
 			if (filePath) {
 				try {
 					const document = await vscode.workspace.openTextDocument(filePath);
@@ -61,36 +76,18 @@ export function activate(context: vscode.ExtensionContext) {
 					editor.revealRange(range, vscode.TextEditorRevealType.InCenter); // center the line in the editor
 					editor.selection = new vscode.Selection(position, position); // set the cursor to the line
 				} catch (error) {
+					logError(`Failed to open file: ${error}`);
 					vscode.window.showErrorMessage(`Failed to open file: ${error}`);
 				}
 			}
 		}),
 	);
 
-	// refresh on create, delete and change
-	const watcher = vscode.workspace.createFileSystemWatcher('**/*');
-
-	watcher.onDidCreate((uri) => {
-		console.log(`File created: ${uri.fsPath}`);
-		treeDataProvider.refresh();
-	});
-
-	watcher.onDidDelete((uri) => {
-		console.log(`File deleted: ${uri.fsPath}`);
-		treeDataProvider.refresh();
-	});
-
-	watcher.onDidChange((uri) => {
-		console.log(`File changed: ${uri.fsPath}`);
-		treeDataProvider.refresh();
-	});
-
-	context.subscriptions.push(watcher);
-
 	// Run commands
 	// Run all
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.runAll', async () => {
+			logInfo('User triggered: extester-runner.runAll');
 			const task = new RunAllTestsTask();
 			await task.execute();
 		}),
@@ -99,6 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// Run folder
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.runFolder', async (item: TreeItem) => {
+			logInfo(`User triggered: extester-runner.runFolder for folder ${item.folderPath as string}`);
 			const task = new RunFileTask(item.folderPath as string);
 			await task.execute();
 		}),
@@ -107,13 +105,33 @@ export function activate(context: vscode.ExtensionContext) {
 	// Run file
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.runFile', async (item: TreeItem) => {
+			logInfo(`User triggered: extester-runner.runFolder for file ${item.filePath as string}`);
 			const task = new RunFileTask(item.filePath as string);
 			await task.execute();
 		}),
 	);
 
-	logDebug('test');
-	logError('test');
+	// refresh on create, delete and change
+	logDebug('Creating file system watcher');
+	const watcher = vscode.workspace.createFileSystemWatcher('**/*');
+
+	watcher.onDidCreate((uri) => {
+		logInfo(`File created: ${uri.fsPath}`);
+		treeDataProvider.refresh();
+	});
+
+	watcher.onDidDelete((uri) => {
+		logInfo(`File deleted: ${uri.fsPath}`);
+		treeDataProvider.refresh();
+	});
+
+	watcher.onDidChange((uri) => {
+		logInfo(`File changed: ${uri.fsPath}`);
+		treeDataProvider.refresh();
+	});
+
+	context.subscriptions.push(watcher);
+
 	logInfo('ExTester Runner extension activated successfully.');
 }
 
@@ -166,6 +184,7 @@ class TreeItem extends vscode.TreeItem {
 
 		this.tooltip = isFolder ? folderPath : filePath;
 
+		// if it's file then you can open it
 		if (!isFolder && filePath) {
 			this.command = {
 				command: 'extesterRunner.openTestItem',
@@ -191,6 +210,7 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	// trigger a refresh of the tree view
 	async refresh(): Promise<void> {
+		logDebug('Refreshing test tree...');
 		this.parsedFiles.clear();
 		this.files = []; // Reset file list
 
@@ -283,6 +303,7 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 	// find test files in the workspace
 	private async findTestFiles(): Promise<void> {
 		try {
+			logDebug('Finding test files.');
 			// search for files matching the pattern '**/*.test.ts', excluding node_modules
 			// get settings or use the default
 			const configuration = vscode.workspace.getConfiguration('extesterRunner');
@@ -302,8 +323,10 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 		} catch (error) {
 			// handle any errors that occur during file search
 			if (error instanceof Error) {
+				logError(`Error finding test files: ${error.message}`);
 				vscode.window.showErrorMessage(`Error finding test files: ${error.message}`);
 			} else {
+				logError(`Unknown error occurred while finding test files.`);
 				vscode.window.showErrorMessage(`Unknown error occurred while finding test files.`);
 			}
 		}
@@ -336,18 +359,15 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 		}
 
 		try {
+			logDebug(`Parsing file ${filePath}`);
 			// parse the file content and store it in the cache
 			const uri = vscode.Uri.file(filePath);
 			const parsedContent = await parseTestFile(uri);
 			this.parsedFiles.set(filePath, parsedContent);
-
-			// log the parsed content to verify -> debug purpose
-			console.log(`Parsed content for file: ${filePath}`);
-			console.log(JSON.stringify(parsedContent, null, 2));
-
 			return parsedContent;
 		} catch (error) {
 			// handle any errors during parsing
+			logError(`Error parsing file ${filePath}: ${error}`);
 			vscode.window.showErrorMessage(`Error parsing file ${filePath}: ${error}`);
 			return [];
 		}
@@ -451,6 +471,8 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 
 	const testStructure: TestBlock[] = []; // root structure
 	const stack: TestBlock[] = []; // stack for managing nesting
+
+	logDebug(`Parsing file: ${uri}`);
 
 	traverse(ast, {
 		CallExpression(path) {
@@ -559,6 +581,7 @@ export async function parseTestFile(uri: vscode.Uri): Promise<TestBlock[]> {
 }
 
 function extractTestName(node: t.Expression | undefined, defaultName: string): string {
+	logDebug(`Extracting filename}`);
     if (t.isStringLiteral(node)) {
         return node.value; // Regular string
     } else if (t.isTemplateLiteral(node)) {
