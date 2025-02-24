@@ -251,9 +251,18 @@ class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 			const folderMap = this.groupFilesByFolder();
 			const files = folderMap.get(actualFolderName) || [];
 			const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
-			let fileItems = files.map(
-				(file) => new TreeItem(file, vscode.TreeItemCollapsibleState.Collapsed, false, path.join(workspaceFolder, actualFolderName, file)),
-			);
+
+			let fileItems = await Promise.all(files.map(async (file) => {
+				const filePath = path.join(workspaceFolder, actualFolderName, file);
+				const parsedContent = await this.getParsedContent(filePath);
+		
+				return new TreeItem(
+					file,
+					parsedContent.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None, // Only expandable if it has content
+					false,
+					filePath
+				);
+			}));
 
 			// Sort files alphabetically
 			return fileItems.sort((a, b) => {
