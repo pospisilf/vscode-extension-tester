@@ -18,7 +18,7 @@ export async function parseTestFile(uri: vscode.Uri, logger: Logger): Promise<Te
 	const testStructure: TestBlock[] = []; // root structure
 	const stack: TestBlock[] = []; // stack for managing nesting
 
-	// logger.debug(`Parsing file: ${uri}`);
+	logger.debug(`Parsing file: ${uri}`);
 
 	traverse(ast, {
 		CallExpression(path) {
@@ -44,7 +44,7 @@ export async function parseTestFile(uri: vscode.Uri, logger: Logger): Promise<Te
 			// handle `describe` blocks
 			if (functionName === 'describe') {
 				const firstArg = path.node.arguments[0];
-				const describeName = extractTestName(t.isExpression(firstArg) ? firstArg : undefined, 'Unnamed Describe');
+				const describeName = extractTestName(t.isExpression(firstArg) ? firstArg : undefined, 'Unnamed Describe', logger);
 
 				const lastElement = stack.length > 0 ? stack[stack.length - 1] : null;
 				let parentDescribeModifier;
@@ -77,7 +77,7 @@ export async function parseTestFile(uri: vscode.Uri, logger: Logger): Promise<Te
 			// handle `it` blocks
 			if (functionName === 'it') {
 				const itArg = path.node.arguments[0];
-				const itName = extractTestName(t.isExpression(itArg) ? itArg : undefined, 'Unnamed It');
+				const itName = extractTestName(t.isExpression(itArg) ? itArg : undefined, 'Unnamed It', logger);
 
 				const lastElement = stack.length > 0 ? stack[stack.length - 1] : null;
 				let parentDescribeModifier;
@@ -126,8 +126,8 @@ export async function parseTestFile(uri: vscode.Uri, logger: Logger): Promise<Te
 	return testStructure;
 }
 
-function extractTestName(node: t.Expression | undefined, defaultName: string): string {
-    // logger.debug(`Extracting filename}`);
+function extractTestName(node: t.Expression | undefined, defaultName: string, logger: Logger): string {
+    logger.debug(`Extracting filename}`);
     if (t.isStringLiteral(node)) {
         return node.value; // Regular string
     } else if (t.isTemplateLiteral(node)) {

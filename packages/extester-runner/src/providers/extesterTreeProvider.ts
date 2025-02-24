@@ -1,9 +1,6 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-// import { RunAllTestsTask } from './tasks/RunAllTask';
-// import { RunFileTask } from './tasks/RunFileTask';
-// import { createLogger, Logger } from './logger/logger';
 import { parseTestFile } from '../utils/parser';
 import { TestBlock } from '../types/testTypes';
 import { TreeItem } from '../types/treeItem';
