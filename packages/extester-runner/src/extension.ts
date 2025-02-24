@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { createLogger, Logger } from './logger/logger';
 import { ExtesterTreeProvider } from './providers/extesterTreeProvider';
 import { registerCommands } from './commands/registerCommands';
+import { createFileWatcher } from './utils/fileWatcher';
 
 let logger: Logger; 
 
@@ -19,29 +20,9 @@ export function activate(context: vscode.ExtensionContext) {
 	logger.debug('Registering tree view');
 	vscode.window.registerTreeDataProvider('extesterView', treeDataProvider);
 
-	logger.debug('Registering commands');
 	registerCommands(context, treeDataProvider, logger);
 
-	// refresh on create, delete and change
-	logger.debug('Creating file system watcher');
-	const watcher = vscode.workspace.createFileSystemWatcher('**/*');
-
-	watcher.onDidCreate((uri) => {
-		logger.info(`File created: ${uri.fsPath}`);
-		treeDataProvider.refresh();
-	});
-
-	watcher.onDidDelete((uri) => {
-		logger.info(`File deleted: ${uri.fsPath}`);
-		treeDataProvider.refresh();
-	});
-
-	watcher.onDidChange((uri) => {
-		logger.info(`File changed: ${uri.fsPath}`);
-		treeDataProvider.refresh();
-	});
-
-	context.subscriptions.push(watcher);
+	createFileWatcher(context, treeDataProvider, logger);
 
 	logger.info('ExTester Runner extension activated successfully.');
 }

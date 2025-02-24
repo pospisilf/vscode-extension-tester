@@ -10,6 +10,7 @@ export function registerCommands(
     treeDataProvider: ExtesterTreeProvider,
     logger: Logger
 ) {
+    logger.debug('Registering commands');
     registerTestCommands(context, logger);
     registerViewCommands(context, treeDataProvider, logger);
     registerFileCommands(context, logger);
