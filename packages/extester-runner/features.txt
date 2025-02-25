@@ -47,4 +47,5 @@ VS Code type changes type used for execution
 VS Code version changes version used for execution
 
 Issues: 
-- global variables probably overrides VS Code type and VS Code version
+- env variables maybe overrides VS Code type and VS Code version
+- TODO: When no file is present, this button can be hiden same way as Run All
