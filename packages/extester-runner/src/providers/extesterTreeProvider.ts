@@ -280,7 +280,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 				const itModifier = it.modifier ?? undefined;
 				const itParentModifier = it.parentModifier ?? undefined;
 
-				itIcon = itModifier || itParentModifier ? getItIcon(itModifier ?? itParentModifier) : new vscode.ThemeIcon('bracket');
+				itIcon = itModifier || itParentModifier ? getItIcon(itModifier ?? itParentModifier) : new vscode.ThemeIcon('variable');
 
 				// Create a TreeItem for the `it` test case.
 				const itItem = new TreeItem(

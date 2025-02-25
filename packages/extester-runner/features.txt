@@ -47,5 +47,4 @@ VS Code type changes type used for execution
 VS Code version changes version used for execution
 
 Issues: 
-- it without modifier currently have bad icon (bracket instead of variable)
 - global variables probably overrides VS Code type and VS Code version
