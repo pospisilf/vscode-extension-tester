@@ -17,27 +17,27 @@
 
 /**
  * Represents a test block, typically corresponding to a `describe` block in a test file.
- * 
+ *
  * A `TestBlock` can contain nested child test blocks and individual test cases (`ItBlock`s).
  */
 export interface TestBlock {
-    describe: string; // name of the test block
-    filePath: string; // file where this block is defined
-    line: number; // line of occurrence
-    modifier?: string | null; // optional: "skip" or "only"
-    parentModifier?: string | null; // optional modifier inherited from a parent block
-    its: ItBlock[]; // list of test cases in this block
-    children: TestBlock[]; // nested test blocks
+	describe: string; // name of the test block
+	filePath: string; // file where this block is defined
+	line: number; // line of occurrence
+	modifier?: string | null; // optional: "skip" or "only"
+	parentModifier?: string | null; // optional modifier inherited from a parent block
+	its: ItBlock[]; // list of test cases in this block
+	children: TestBlock[]; // nested test blocks
 }
 
 /**
  * Represents an individual test case, typically corresponding to an `it` block in a test file.
  */
 export interface ItBlock {
-    name: string; // name of the test case
-    filePath: string; // file where this test case is defined
-    line: number; // line of occurrence
-    modifier?: string | null; // optional: "skip" or "only"
-    parentModifier?: string | null; // optional modifier inherited from a parent block
-    describeModifier?: string | null; // optional modifier inherited from the enclosing `describe`
+	name: string; // name of the test case
+	filePath: string; // file where this test case is defined
+	line: number; // line of occurrence
+	modifier?: string | null; // optional: "skip" or "only"
+	parentModifier?: string | null; // optional modifier inherited from a parent block
+	describeModifier?: string | null; // optional modifier inherited from the enclosing `describe`
 }

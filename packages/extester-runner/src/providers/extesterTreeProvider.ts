@@ -1,4 +1,3 @@
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,7 +24,7 @@ import { Logger } from '../logger/logger';
 
 /**
  * Provides test file and test structure data for the ExTester test explorer tree view.
- * 
+ *
  * This class implements `vscode.TreeDataProvider<TreeItem>` and is responsible for:
  * - Discovering test files in the workspace.
  * - Parsing test files to extract `describe` and `it` blocks.
@@ -45,7 +44,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	/**
 	 * Creates an instance of the `ExtesterTreeProvider`.
-	 * 
+	 *
 	 * @param {Logger} logger - The logging utility for debugging and tracking file operations.
 	 */
 	constructor(logger: Logger) {
@@ -55,10 +54,10 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	/**
 	 * Refreshes the test tree view.
-	 * 
+	 *
 	 * This method re-scans the workspace for test files, updates the test structure, and
 	 * triggers a UI refresh. It also ensures that the test tree state is updated.
-	 * 
+	 *
 	 * @returns {Promise<void>} - Resolves when the refresh is complete.
 	 */
 	async refresh(): Promise<void> {
@@ -78,7 +77,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	/**
 	 * Retrieves the tree item representation of a given element.
-	 * 
+	 *
 	 * @param {TreeItem} element - The tree item to render.
 	 * @returns {vscode.TreeItem} - The visual representation of the tree item.
 	 */
@@ -88,21 +87,20 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	/**
 	 * Retrieves the children of a given tree item.
-	 * 
+	 *
 	 * This method is responsible for building the tree hierarchy by returning test folders,
 	 * files, or parsed test structures depending on the selected item.
-	 * 
+	 *
 	 * @param {TreeItem} [element] - The parent element, if any.
 	 * @returns {Promise<TreeItem[]>} - The list of child items.
 	 */
 	async getChildren(element?: TreeItem): Promise<TreeItem[]> {
 		if (!element) {
-
 			// If no files found, put info message to view.
 			if (!this.hasTestFiles) {
-				const noFilesItem = new TreeItem("No test files found", vscode.TreeItemCollapsibleState.None, false);
-				noFilesItem.contextValue = "noFiles";
-				noFilesItem.iconPath = new vscode.ThemeIcon("warning");
+				const noFilesItem = new TreeItem('No test files found', vscode.TreeItemCollapsibleState.None, false);
+				noFilesItem.contextValue = 'noFiles';
+				noFilesItem.iconPath = new vscode.ThemeIcon('warning');
 				return [noFilesItem];
 			}
 
@@ -133,17 +131,19 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 			const files = folderMap.get(actualFolderName) || [];
 			const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
 
-			let fileItems = await Promise.all(files.map(async (file) => {
-				const filePath = path.join(workspaceFolder, actualFolderName, file);
-				const parsedContent = await this.getParsedContent(filePath);
+			let fileItems = await Promise.all(
+				files.map(async (file) => {
+					const filePath = path.join(workspaceFolder, actualFolderName, file);
+					const parsedContent = await this.getParsedContent(filePath);
 
-				return new TreeItem(
-					file,
-					parsedContent.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None, // only expandable if it has content
-					false,
-					filePath
-				);
-			}));
+					return new TreeItem(
+						file,
+						parsedContent.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None, // only expandable if it has content
+						false,
+						filePath,
+					);
+				}),
+			);
 
 			// Sort files alphabetically.
 			return fileItems.sort((a, b) => {
@@ -162,7 +162,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 	}
 	/**
 	 * Finds test files in the workspace.
-	 * 
+	 *
 	 * Searches for test files using a configurable glob pattern while excluding
 	 * `node_modules` by default.
 	 */
@@ -191,7 +191,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	/**
 	 * Groups test files by their parent folder.
-	 * 
+	 *
 	 * @returns {Map<string, string[]>} - A mapping of folder names to their contained files.
 	 */
 	private groupFilesByFolder(): Map<string, string[]> {
@@ -214,7 +214,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	/**
 	 * Retrieves and caches parsed test file contents.
-	 * 
+	 *
 	 * @param {string} filePath - The file path to parse.
 	 * @returns {Promise<TestBlock[]>} - Parsed test structure.
 	 */
@@ -238,11 +238,11 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	/**
 	 * Converts a list of parsed test blocks into `TreeItem` instances for the test explorer view.
-	 * 
-	 * This method processes both `describe` and `it` blocks, creating a hierarchical structure 
-	 * for the tree view. It assigns appropriate icons and context values based on test modifiers 
+	 *
+	 * This method processes both `describe` and `it` blocks, creating a hierarchical structure
+	 * for the tree view. It assigns appropriate icons and context values based on test modifiers
 	 * (e.g., `only`, `skip`).
-	 * 
+	 *
 	 * @param {TestBlock[]} testBlocks - The parsed test blocks representing the test structure.
 	 * @returns {TreeItem[]} - A list of `TreeItem` instances representing the test hierarchy.
 	 */
@@ -261,10 +261,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 			const parentModifier = block.parentModifier ?? undefined;
 
 			// Assign icon based on modifier.
-			describeIcon = modifier || parentModifier
-				? getThemeIcon(modifier ?? parentModifier)
-				: new vscode.ThemeIcon('bracket');
-
+			describeIcon = modifier || parentModifier ? getThemeIcon(modifier ?? parentModifier) : new vscode.ThemeIcon('bracket');
 
 			// Recursively process nested `describe` blocks.
 			const nestedDescribeItems = this.convertTestBlocksToTreeItems(block.children);
@@ -291,7 +288,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 					vscode.TreeItemCollapsibleState.None,
 					false,
 					undefined, // no file path for `it`
-					it.line
+					it.line,
 				);
 
 				// Assign metadata to the `it` block.
@@ -311,9 +308,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 			// Determine collapsible state based on child elements.
 			const collapsibleState =
-				nestedDescribeItems.length > 0 || itItems.length > 0
-					? vscode.TreeItemCollapsibleState.Collapsed
-					: vscode.TreeItemCollapsibleState.None;
+				nestedDescribeItems.length > 0 || itItems.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
 
 			// Create a TreeItem for the `describe` block.
 			const describeItem = new TreeItem(
@@ -321,7 +316,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 				collapsibleState,
 				false,
 				undefined, // no file path for `describe` to avoid infinite parsing loop
-				block.line
+				block.line,
 			);
 
 			// Assign metadata to the `describe` block.

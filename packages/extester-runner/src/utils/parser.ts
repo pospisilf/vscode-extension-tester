@@ -24,11 +24,11 @@ import { TestBlock } from '../types/testTypes';
 
 /**
  * Parses a test file and extracts its structure.
- * 
+ *
  * This function analyzes TypeScript test files using Babel's AST parser and identifies
  * `describe` and `it` blocks. It constructs a hierarchical representation of the test structure
  * to be used in a test explorer or similar UI.
- * 
+ *
  * @param {vscode.Uri} uri - The URI of the file to be parsed.
  * @param {Logger} logger - The logging utility for debugging and tracking parsing operations.
  * @returns {Promise<TestBlock[]>} - A structured representation of the test file.
@@ -49,11 +49,11 @@ export async function parseTestFile(uri: vscode.Uri, logger: Logger): Promise<Te
 	logger.debug(`Parsing file: ${uri}`);
 
 	traverse(ast, {
-		 /**
-         * Handles function calls in the AST to detect test blocks.
-         * Identifies `describe` and `it` blocks, extracts their names, 
-         * and organizes them into a structured hierarchy.
-         */
+		/**
+		 * Handles function calls in the AST to detect test blocks.
+		 * Identifies `describe` and `it` blocks, extracts their names,
+		 * and organizes them into a structured hierarchy.
+		 */
 		CallExpression(path) {
 			const callee = path.node.callee;
 			let functionName: string | undefined = undefined;
@@ -128,11 +128,11 @@ export async function parseTestFile(uri: vscode.Uri, logger: Logger): Promise<Te
 			}
 		},
 
-		 /**
-         * Handles exit conditions for `describe` blocks.
-         * Ensures that nested test structures are properly closed when the parser
-         * finishes processing a `describe` block.
-         */
+		/**
+		 * Handles exit conditions for `describe` blocks.
+		 * Ensures that nested test structures are properly closed when the parser
+		 * finishes processing a `describe` block.
+		 */
 		exit(path) {
 			if (path.isCallExpression()) {
 				const callee = path.node.callee;
@@ -158,37 +158,37 @@ export async function parseTestFile(uri: vscode.Uri, logger: Logger): Promise<Te
 
 /**
  * Extracts the test name from a node in the AST.
- * 
+ *
  * This function handles different node types, such as string literals and template literals,
  * and attempts to resolve meaningful test names.
- * 
+ *
  * @param {t.Expression | undefined} node - The AST node containing the test name.
  * @param {string} defaultName - The default name to use if extraction fails.
  * @param {Logger} logger - The logging utility for debugging.
  * @returns {string} - The extracted test name or the default name if extraction fails.
  */
 function extractTestName(node: t.Expression | undefined, defaultName: string, logger: Logger): string {
-    logger.debug(`Extracting filename.}`);
+	logger.debug(`Extracting filename.}`);
 
-    if (t.isStringLiteral(node)) {
-        return node.value; // regular string
-    } else if (t.isTemplateLiteral(node)) {
-        return node.quasis
-            .map((q, i) => {
-                let text = q.value.cooked ?? ''; // static text
-                if (node.expressions[i]) {
-                    const expr = node.expressions[i];
+	if (t.isStringLiteral(node)) {
+		return node.value; // regular string
+	} else if (t.isTemplateLiteral(node)) {
+		return node.quasis
+			.map((q, i) => {
+				let text = q.value.cooked ?? ''; // static text
+				if (node.expressions[i]) {
+					const expr = node.expressions[i];
 
-                    // If the expression is an identifier (a variable like "foo"), keep its name.
-                    if (t.isIdentifier(expr)) {
-                        text += `\${${expr.name}}`;
-                    } else {
-                        text += '${?}'; // Unknown expressions get a placeholder.
-                    }
-                }
-                return text;
-            })
-            .join('');
-    }
-    return defaultName; // Fallback if no valid name is found.
+					// If the expression is an identifier (a variable like "foo"), keep its name.
+					if (t.isIdentifier(expr)) {
+						text += `\${${expr.name}}`;
+					} else {
+						text += '${?}'; // Unknown expressions get a placeholder.
+					}
+				}
+				return text;
+			})
+			.join('');
+	}
+	return defaultName; // Fallback if no valid name is found.
 }

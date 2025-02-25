@@ -22,48 +22,47 @@ import { Logger } from '../logger/logger';
 
 /**
  * Registers test-related commands for the VS Code extension.
- * 
- * This function registers commands for running all tests, running tests within a folder, 
+ *
+ * This function registers commands for running all tests, running tests within a folder,
  * and running a single test file. Each command creates and executes a corresponding test task.
- * 
+ *
  * @param {vscode.ExtensionContext} context - The extension context, used for registering commands.
  * @param {Logger} logger - The logging utility for debugging and tracking command execution.
  */
 export function registerTestCommands(context: vscode.ExtensionContext, logger: Logger) {
+	/**
+	 * Registers the `extester-runner.runAll` command.
+	 * This command triggers the execution of all available tests in the workspace.
+	 */
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extester-runner.runAll', async () => {
+			logger.debug('User triggered: extester-runner.runAll.');
+			const task = new RunAllTestsTask();
+			await task.execute();
+		}),
+	);
 
-    /**
-     * Registers the `extester-runner.runAll` command.
-     * This command triggers the execution of all available tests in the workspace.
-     */
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extester-runner.runAll', async () => {
-            logger.debug('User triggered: extester-runner.runAll.');
-            const task = new RunAllTestsTask();
-            await task.execute();
-        })
-    );
+	/**
+	 * Registers the `extester-runner.runFolder` command.
+	 * This command runs all test files within a specified folder.
+	 */
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extester-runner.runFolder', async (item) => {
+			logger.debug(`User triggered: extester-runner.runFolder for folder ${item.folderPath}.`);
+			const task = new RunFileTask(item.folderPath);
+			await task.execute();
+		}),
+	);
 
-     /**
-     * Registers the `extester-runner.runFolder` command.
-     * This command runs all test files within a specified folder.
-     */
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extester-runner.runFolder', async (item) => {
-            logger.debug(`User triggered: extester-runner.runFolder for folder ${item.folderPath}.`);
-            const task = new RunFileTask(item.folderPath);
-            await task.execute();
-        }),
-    );
-
-    /**
-     * Registers the `extester-runner.runFile` command.
-     * This command runs a specific test file within the workspace.
-     */
-    context.subscriptions.push(
-        vscode.commands.registerCommand('extester-runner.runFile', async (item) => {
-            logger.debug(`User triggered: extester-runner.runFile for file ${item.filePath}.`);
-            const task = new RunFileTask(item.filePath);
-            await task.execute();
-        })
-    );
+	/**
+	 * Registers the `extester-runner.runFile` command.
+	 * This command runs a specific test file within the workspace.
+	 */
+	context.subscriptions.push(
+		vscode.commands.registerCommand('extester-runner.runFile', async (item) => {
+			logger.debug(`User triggered: extester-runner.runFile for file ${item.filePath}.`);
+			const task = new RunFileTask(item.filePath);
+			await task.execute();
+		}),
+	);
 }

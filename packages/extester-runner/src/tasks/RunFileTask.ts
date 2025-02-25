@@ -21,26 +21,26 @@ import * as path from 'path';
 
 /**
  * Task for running a single test file within the workspace.
- * 
- * This task executes a specified test file by converting its TypeScript path to the 
- * corresponding JavaScript file in the output folder. It retrieves necessary configurations 
+ *
+ * This task executes a specified test file by converting its TypeScript path to the
+ * corresponding JavaScript file in the output folder. It retrieves necessary configurations
  * and constructs the appropriate command for execution using `extest`.
  */
 export class RunFileTask extends TestRunner {
 	/**
-     * Creates an instance of the `RunFileTask`.
-     * 
-     * This constructor retrieves configurations, transforms the file path to match the 
-     * compiled output location, and sets up the shell execution command.
-     * 
-     * @param {string} file - The absolute path of the test file to be executed.
-     */
+	 * Creates an instance of the `RunFileTask`.
+	 *
+	 * This constructor retrieves configurations, transforms the file path to match the
+	 * compiled output location, and sets up the shell execution command.
+	 *
+	 * @param {string} file - The absolute path of the test file to be executed.
+	 */
 	constructor(file: string) {
 		const configuration = workspace.getConfiguration('extesterRunner');
 
 		// Retrieve additional command-line arguments from configuration.
 		const additionalArgs: string[] = configuration.get<string[]>('additionalArgs', []);
-		const outputFolder = configuration.get<string>('outFolder') || 'out'; 
+		const outputFolder = configuration.get<string>('outFolder') || 'out';
 		const workspaceFolder = workspace.workspaceFolders?.[0]?.uri.fsPath || '';
 		const vsCodeVersion = configuration.get<string>('vsCodeVersion');
 		const versionArg = vsCodeVersion ? `--code_version ${vsCodeVersion}` : '';
@@ -48,7 +48,8 @@ export class RunFileTask extends TestRunner {
 
 		// Convert file path to the correct output path.
 		const relativePath = path.relative(workspaceFolder, file);
-		const outputPath = path.join(outputFolder, relativePath)
+		const outputPath = path
+			.join(outputFolder, relativePath)
 			.replace(new RegExp(`\\b${path.sep}?src${path.sep}`, 'g'), `${outputFolder}${path.sep}`) // replace 'src/' correctly
 			.replace(/\.ts$/, '.js'); // convert '.ts' to '.js'
 
@@ -58,9 +59,7 @@ export class RunFileTask extends TestRunner {
 		const quotedArgs = additionalArgs.map(escapeQuotes).join(' ');
 
 		// Construct the shell execution command.
-		const shellExecution = new ShellExecution(
-			`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`
-		);
+		const shellExecution = new ShellExecution(`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`);
 
 		super(TaskScope.Workspace, 'Run Test File', shellExecution);
 	}

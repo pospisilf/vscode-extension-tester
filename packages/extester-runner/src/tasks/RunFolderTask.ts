@@ -21,20 +21,20 @@ import * as path from 'path';
 
 /**
  * Task for running all test files within a specified folder.
- * 
- * This task executes all test files located within a given folder by converting the 
- * folder path to match the compiled output structure. It retrieves necessary configurations 
+ *
+ * This task executes all test files located within a given folder by converting the
+ * folder path to match the compiled output structure. It retrieves necessary configurations
  * and constructs the appropriate command for execution using `extest`.
  */
 export class RunFolderTask extends TestRunner {
 	/**
-     * Creates an instance of the `RunFolderTask`.
-     * 
-     * This constructor retrieves configurations, transforms the folder path to match the 
-     * compiled output structure, and sets up the shell execution command.
-     * 
-     * @param {string} folder - The absolute path of the folder containing test files.
-     */
+	 * Creates an instance of the `RunFolderTask`.
+	 *
+	 * This constructor retrieves configurations, transforms the folder path to match the
+	 * compiled output structure, and sets up the shell execution command.
+	 *
+	 * @param {string} folder - The absolute path of the folder containing test files.
+	 */
 	constructor(folder: string) {
 		const configuration = workspace.getConfiguration('extesterRunner');
 
@@ -48,7 +48,8 @@ export class RunFolderTask extends TestRunner {
 
 		// Convert folder path to the correct output path.
 		const relativePath = path.relative(workspaceFolder, folder);
-		const outputPath = path.join(outputFolder, relativePath, '**', '*.test.js')
+		const outputPath = path
+			.join(outputFolder, relativePath, '**', '*.test.js')
 			.replace(new RegExp(`\\b${path.sep}?src${path.sep}`, 'g'), `${outputFolder}${path.sep}`); // replace 'src/' correctly
 
 		// Ensure paths with spaces are properly quoted.
@@ -57,9 +58,7 @@ export class RunFolderTask extends TestRunner {
 		const quotedArgs = additionalArgs.map(escapeQuotes).join(' ');
 
 		// Construct the shell execution command.
-		const shellExecution = new ShellExecution(
-			`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`
-		);
+		const shellExecution = new ShellExecution(`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`);
 
 		super(TaskScope.Workspace, 'Run Test Folder', shellExecution);
 	}

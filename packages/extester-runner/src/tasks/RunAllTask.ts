@@ -21,18 +21,18 @@ import * as path from 'path';
 
 /**
  * Task for running all tests within the workspace.
- * 
+ *
  * This task executes all test files found within the specified output folder.
- * It retrieves configuration settings from the VS Code workspace and constructs 
+ * It retrieves configuration settings from the VS Code workspace and constructs
  * the appropriate command for running the tests using `extest`.
  */
 export class RunAllTestsTask extends TestRunner {
 	/**
-     * Creates an instance of the `RunAllTestsTask`.
-     * 
-     * This constructor retrieves necessary configurations, constructs the output path,
-     * and sets up the command execution using `ShellExecution`.
-     */
+	 * Creates an instance of the `RunAllTestsTask`.
+	 *
+	 * This constructor retrieves necessary configurations, constructs the output path,
+	 * and sets up the command execution using `ShellExecution`.
+	 */
 	constructor() {
 		const configuration = workspace.getConfiguration('extesterRunner');
 
@@ -47,12 +47,10 @@ export class RunAllTestsTask extends TestRunner {
 
 		// Ensure paths with spaces are properly quoted.
 		const quotedOutputPath = `"${outputPath}"`;
-		const quotedArgs = additionalArgs.map(arg => `"${arg}"`).join(' ');
+		const quotedArgs = additionalArgs.map((arg) => `"${arg}"`).join(' ');
 
 		// Construct the shell execution command.
-		const shellExecution = new ShellExecution(
-			`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`
-		);
+		const shellExecution = new ShellExecution(`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`);
 
 		super(TaskScope.Workspace, 'Run All Tests', shellExecution);
 	}

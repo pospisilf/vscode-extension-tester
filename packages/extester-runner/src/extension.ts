@@ -21,24 +21,24 @@ import { ExtesterTreeProvider } from './providers/extesterTreeProvider';
 import { registerCommands } from './commands/registerCommands';
 import { createFileWatcher } from './utils/fileWatcher';
 
-let logger: Logger; 
+let logger: Logger;
 
 /**
  * Activates the ExTester Runner extension.
- * 
- * This function initializes the extension by setting up logging, registering the test tree view, 
+ *
+ * This function initializes the extension by setting up logging, registering the test tree view,
  * registering commands, and creating a file system watcher. It runs automatically when the extension is loaded.
- * 
+ *
  * @param {vscode.ExtensionContext} context - The extension context, used for managing subscriptions.
  */
 export function activate(context: vscode.ExtensionContext) {
 	// Create an output channel for logging.
-    const outputChannel = vscode.window.createOutputChannel('ExTester Runner');
+	const outputChannel = vscode.window.createOutputChannel('ExTester Runner');
 	logger = createLogger(outputChannel);
 
-    logger.info('Activating ExTester Runner extension...');
-	
-	 // Register the test tree view.
+	logger.info('Activating ExTester Runner extension...');
+
+	// Register the test tree view.
 	const treeDataProvider = new ExtesterTreeProvider(logger);
 	logger.debug('Registering tree view.');
 	vscode.window.registerTreeDataProvider('extesterView', treeDataProvider);
@@ -54,7 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 /**
  * Deactivates the ExTester Runner extension.
- * 
+ *
  * This function is called when VS Code shuts down or the extension is deactivated.
  * It disposes of the output channel to free resources.
  */
