@@ -18,29 +18,56 @@
 import { ShellExecution, Task, TaskDefinition, tasks, TaskScope, WorkspaceFolder } from 'vscode';
 
 /**
- * TODO
+ * Abstract base class for test execution tasks.
+ * 
+ * This class extends VS Code's `Task` and provides a standardized way to execute 
+ * test-related tasks using a shell command. It includes an automatic mechanism to wait 
+ * for task completion before proceeding.
+ * 
+ * Subclasses should implement specific test execution logic while inheriting 
+ * the task execution and tracking behavior.
  */
 export abstract class TestRunner extends Task {
-	protected label: string;
 
-	// https://code.visualstudio.com/api/references/vscode-api#TaskPresentationOptions
+	protected label: string;
+	
+	/**
+     * Creates an instance of the `TestRunner` task.
+     * 
+     * @param {WorkspaceFolder | TaskScope.Workspace} scope - The scope in which the task runs.
+     * @param {string} label - The name of the task.
+     * @param {ShellExecution} shellExecution - The shell command to execute for the task.
+     */
 	constructor(scope: WorkspaceFolder | TaskScope.Workspace, label: string, shellExecution: ShellExecution) {
-		
 		const taskDefinition: TaskDefinition = {
 			label: label,
 			type: 'shell',
 		};
 
 		super(taskDefinition, scope, label, 'extester-runner', shellExecution);
-		this.presentationOptions.clear = true;
 		this.label = label;
+		this.presentationOptions.clear = true; // clean terminal output before each execution
 	}
-
+	
+	/**
+	 * Executes the test task asynchronously.
+     * This method starts the task execution and waits for its completion before returning.
+     * 
+     * @returns {Promise<void>} Resolves when the task has completed.
+     */
 	public async execute(): Promise<void> {
 		await tasks.executeTask(this);
 		return await this.waitForEnd();
 	}
 
+	/**
+     * Waits for the task to complete before resolving the promise.
+     * 
+     * This method listens for the `onDidEndTask` event and resolves once the task 
+     * matching this instance's label has completed.
+     * 
+     * @returns {Promise<void>} Resolves when the task execution ends.
+     */
 	private async waitForEnd(): Promise<void> {
 		await new Promise<void>((resolve) => {
 			const disposable = tasks.onDidEndTask((e) => {
