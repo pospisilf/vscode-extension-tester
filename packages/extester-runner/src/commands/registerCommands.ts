@@ -22,12 +22,24 @@ import { registerFileCommands } from './fileCommands';
 import { ExtesterTreeProvider } from '../providers/extesterTreeProvider';
 import { Logger } from '../logger/logger';
 
+/**
+ * Registers all extension commands within the VS Code extension.
+ * 
+ * This function initializes and registers commands related to:
+ * - Testing (via `testCommands`)
+ * - View Management (via `viewCommands`)
+ * - File Operations (via `fileCommands`)
+ * 
+ * @param {vscode.ExtensionContext} context - The extension context, used for registering commands.
+ * @param {ExtesterTreeProvider} treeDataProvider - The tree data provider for managing extension views.
+ * @param {Logger} logger - The logging utility for debugging and error tracking.
+ */
 export function registerCommands(
     context: vscode.ExtensionContext,
     treeDataProvider: ExtesterTreeProvider,
     logger: Logger
 ) {
-    logger.debug('Registering commands');
+    logger.debug('Registering commands.');
     registerTestCommands(context, logger);
     registerViewCommands(context, treeDataProvider, logger);
     registerFileCommands(context, logger);
