@@ -23,7 +23,7 @@ Inherit for modifier is working as following:
     - own modifier of it inside this scope has priority (overrides the describe one)
 Clicking on describe or it opens editor on line of occurrence
 Collapse All button is available
-    - if no folder nor file is present, button is not available
+    - if no folder nor file is present, button is not clickable
 Clicking on Collapse All button actually collapse all folders and files
 New file matching pattern is created, explorer will update itself
 File matching pattern is deleted, explorer will update itself

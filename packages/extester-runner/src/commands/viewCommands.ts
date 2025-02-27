@@ -40,14 +40,4 @@ export function registerViewCommands(context: vscode.ExtensionContext, treeDataP
 			treeDataProvider.refresh();
 		}),
 	);
-	/**
-	 * Registers the `extester-runner.collapseAll` command.
-	 * This command collapses all items in the ExTester test view to improve navigation.
-	 */
-	context.subscriptions.push(
-		vscode.commands.registerCommand('extester-runner.collapseAll', async () => {
-			logger.debug('User triggered: extester-runner.collapseAll.');
-			vscode.commands.executeCommand('workbench.actions.treeView.extesterView.collapseAll');
-		}),
-	);
 }

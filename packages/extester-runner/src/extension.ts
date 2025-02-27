@@ -41,7 +41,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// Register the test tree view.
 	const treeDataProvider = new ExtesterTreeProvider(logger);
 	logger.debug('Registering tree view.');
-	vscode.window.registerTreeDataProvider('extesterView', treeDataProvider);
+	vscode.window.createTreeView('extesterView', {
+		treeDataProvider: treeDataProvider,
+		showCollapseAll: true
+	});
 
 	// Register extension commands.
 	registerCommands(context, treeDataProvider, logger);
