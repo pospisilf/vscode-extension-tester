@@ -16,6 +16,7 @@
  */
 
 import { ShellExecution, Task, TaskDefinition, tasks, TaskScope, WorkspaceFolder } from 'vscode';
+import { Logger } from '../logger/logger';
 
 /**
  * Abstract base class for test execution tasks.
@@ -29,6 +30,7 @@ import { ShellExecution, Task, TaskDefinition, tasks, TaskScope, WorkspaceFolder
  */
 export abstract class TestRunner extends Task {
 	protected label: string;
+	protected logger: Logger;
 
 	/**
 	 * Creates an instance of the `TestRunner` task.
@@ -36,8 +38,9 @@ export abstract class TestRunner extends Task {
 	 * @param {WorkspaceFolder | TaskScope.Workspace} scope - The scope in which the task runs.
 	 * @param {string} label - The name of the task.
 	 * @param {ShellExecution} shellExecution - The shell command to execute for the task.
+	 * @param {Logger} logger - Logger instance for tracking task execution.
 	 */
-	constructor(scope: WorkspaceFolder | TaskScope.Workspace, label: string, shellExecution: ShellExecution) {
+	constructor(scope: WorkspaceFolder | TaskScope.Workspace, label: string, shellExecution: ShellExecution, logger: Logger) {
 		const taskDefinition: TaskDefinition = {
 			label: label,
 			type: 'shell',
@@ -45,6 +48,7 @@ export abstract class TestRunner extends Task {
 
 		super(taskDefinition, scope, label, 'extester-runner', shellExecution);
 		this.label = label;
+		this.logger = logger;
 		this.presentationOptions.clear = true; // clean terminal output before each execution
 	}
 
@@ -55,8 +59,14 @@ export abstract class TestRunner extends Task {
 	 * @returns {Promise<void>} Resolves when the task has completed.
 	 */
 	public async execute(): Promise<void> {
-		await tasks.executeTask(this);
-		return await this.waitForEnd();
+		this.logger.info(`Starting test execution: ${this.label}`);
+		try {
+			await tasks.executeTask(this);
+			await this.waitForEnd();
+			this.logger.info(`Test execution completed: ${this.label}`);
+		} catch (error) {
+			this.logger.error(`Test execution failed: ${this.label} - ${error}`);
+		}
 	}
 
 	/**
@@ -71,6 +81,7 @@ export abstract class TestRunner extends Task {
 		await new Promise<void>((resolve) => {
 			const disposable = tasks.onDidEndTask((e) => {
 				if (e.execution.task.name === this.label) {
+					this.logger.debug(`Task finished: ${this.label}`);
 					disposable.dispose();
 					resolve();
 				}

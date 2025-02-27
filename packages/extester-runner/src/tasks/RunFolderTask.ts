@@ -18,6 +18,7 @@
 import { ShellExecution, TaskScope, workspace } from 'vscode';
 import { TestRunner } from './TestRunnerTask';
 import * as path from 'path';
+import { Logger } from '../logger/logger';
 
 /**
  * Task for running all test files within a specified folder.
@@ -35,7 +36,7 @@ export class RunFolderTask extends TestRunner {
 	 *
 	 * @param {string} folder - The absolute path of the folder containing test files.
 	 */
-	constructor(folder: string) {
+	constructor(folder: string, logger: Logger) {
 		const configuration = workspace.getConfiguration('extesterRunner');
 
 		// Retrieve additional command-line arguments from configuration.
@@ -60,6 +61,6 @@ export class RunFolderTask extends TestRunner {
 		// Construct the shell execution command.
 		const shellExecution = new ShellExecution(`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`);
 
-		super(TaskScope.Workspace, 'Run Test Folder', shellExecution);
+		super(TaskScope.Workspace, 'Run Test Folder', shellExecution, logger);
 	}
 }

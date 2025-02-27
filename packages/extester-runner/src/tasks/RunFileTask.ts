@@ -18,6 +18,7 @@
 import { ShellExecution, TaskScope, workspace } from 'vscode';
 import { TestRunner } from './TestRunnerTask';
 import * as path from 'path';
+import { Logger } from '../logger/logger';
 
 /**
  * Task for running a single test file within the workspace.
@@ -35,7 +36,7 @@ export class RunFileTask extends TestRunner {
 	 *
 	 * @param {string} file - The absolute path of the test file to be executed.
 	 */
-	constructor(file: string) {
+	constructor(file: string, logger: Logger) {
 		const configuration = workspace.getConfiguration('extesterRunner');
 
 		// Retrieve additional command-line arguments from configuration.
@@ -61,6 +62,6 @@ export class RunFileTask extends TestRunner {
 		// Construct the shell execution command.
 		const shellExecution = new ShellExecution(`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`);
 
-		super(TaskScope.Workspace, 'Run Test File', shellExecution);
+		super(TaskScope.Workspace, 'Run Test File', shellExecution, logger);
 	}
 }

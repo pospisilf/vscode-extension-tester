@@ -18,6 +18,7 @@
 import { ShellExecution, TaskScope, workspace } from 'vscode';
 import { TestRunner } from './TestRunnerTask';
 import * as path from 'path';
+import { Logger } from '../logger/logger';
 
 /**
  * Task for running all tests within the workspace.
@@ -33,7 +34,7 @@ export class RunAllTestsTask extends TestRunner {
 	 * This constructor retrieves necessary configurations, constructs the output path,
 	 * and sets up the command execution using `ShellExecution`.
 	 */
-	constructor() {
+	constructor(logger: Logger) {
 		const configuration = workspace.getConfiguration('extesterRunner');
 
 		// Retrieve additional command-line arguments from configuration.
@@ -52,6 +53,6 @@ export class RunAllTestsTask extends TestRunner {
 		// Construct the shell execution command.
 		const shellExecution = new ShellExecution(`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`);
 
-		super(TaskScope.Workspace, 'Run All Tests', shellExecution);
+		super(TaskScope.Workspace, 'Run All Tests', shellExecution, logger);
 	}
 }

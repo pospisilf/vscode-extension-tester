@@ -37,7 +37,7 @@ export function registerTestCommands(context: vscode.ExtensionContext, logger: L
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.runAll', async () => {
 			logger.debug('User triggered: extester-runner.runAll.');
-			const task = new RunAllTestsTask();
+			const task = new RunAllTestsTask(logger);
 			await task.execute();
 		}),
 	);
@@ -49,7 +49,7 @@ export function registerTestCommands(context: vscode.ExtensionContext, logger: L
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.runFolder', async (item) => {
 			logger.debug(`User triggered: extester-runner.runFolder for folder ${item.folderPath}.`);
-			const task = new RunFileTask(item.folderPath);
+			const task = new RunFileTask(item.folderPath, logger);
 			await task.execute();
 		}),
 	);
@@ -61,7 +61,7 @@ export function registerTestCommands(context: vscode.ExtensionContext, logger: L
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.runFile', async (item) => {
 			logger.debug(`User triggered: extester-runner.runFile for file ${item.filePath}.`);
-			const task = new RunFileTask(item.filePath);
+			const task = new RunFileTask(item.filePath, logger);
 			await task.execute();
 		}),
 	);
