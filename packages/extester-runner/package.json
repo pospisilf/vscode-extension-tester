@@ -11,7 +11,7 @@
     "directory": "packages/extester-runner"
   },
   "license": "Apache-2.0",
-  "version": "0.0.110",
+  "version": "0.0.111",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -168,7 +168,7 @@
         },
         {
           "command": "extester-runner.collapseAll",
-          "when": "view == extesterView",
+          "when": "view == extesterView && extesterRunner.hasTestFiles",
           "group": "navigation@3"
         }
       ],

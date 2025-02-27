@@ -23,7 +23,7 @@ Inherit for modifier is working as following:
     - own modifier of it inside this scope has priority (overrides the describe one)
 Clicking on describe or it opens editor on line of occurrence
 Collapse All button is available
-    - TODO: When no file is present, this button can be hiden same way as Run All
+    - if no folder nor file is present, button is not available
 Clicking on Collapse All button actually collapse all folders and files
 New file matching pattern is created, explorer will update itself
 File matching pattern is deleted, explorer will update itself
@@ -46,6 +46,4 @@ Test File Glob specifies prescription for file searching
 VS Code type changes type used for execution
 VS Code version changes version used for execution
 
-Issues: 
-- env variables maybe overrides VS Code type and VS Code version
-- TODO: When no file is present, this button can be hiden same way as Run All
+Issues:
