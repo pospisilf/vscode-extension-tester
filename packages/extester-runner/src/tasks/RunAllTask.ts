@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as vscode from 'vscode';
 import { ShellExecution, TaskScope, workspace } from 'vscode';
 import { TestRunner } from './TestRunnerTask';
 import * as path from 'path';
@@ -26,6 +27,7 @@ import { Logger } from '../logger/logger';
  * This task executes all test files found within the specified output folder.
  * It retrieves configuration settings from the VS Code workspace and constructs
  * the appropriate command for running the tests using `extest`.
+ * @param {Logger} logger - The logger instance for logging messages.
  */
 export class RunAllTestsTask extends TestRunner {
 	/**
@@ -35,23 +37,44 @@ export class RunAllTestsTask extends TestRunner {
 	 * and sets up the command execution using `ShellExecution`.
 	 */
 	constructor(logger: Logger) {
-		const configuration = workspace.getConfiguration('extesterRunner');
-
-		// Retrieve additional command-line arguments from configuration.
-		const additionalArgs: string[] = configuration.get<string[]>('additionalArgs', []);
+		const configuration = workspace.getConfiguration('extesterRunner');	
+	
 		const outputFolder = configuration.get<string>('outFolder') || 'out';
-		const workspaceFolder = workspace.workspaceFolders?.[0]?.uri.fsPath || '';
-		const outputPath = path.join(workspaceFolder, outputFolder, '**', '*.test.js');
+		const workspaceFolder = workspace.workspaceFolders?.[0]?.uri.fsPath;
+
+		if (!workspaceFolder) {
+			logger.error('No workspace folder found.');
+			vscode.window.showErrorMessage(`No workspace folder found.`);
+			throw new Error('No workspace folder found.');
+		} 
+
 		const vsCodeVersion = configuration.get<string>('vsCodeVersion');
-		const versionArg = vsCodeVersion ? `--code_version ${vsCodeVersion}` : '';
+		const versionArgs = vsCodeVersion ? ['--code_version', vsCodeVersion] : [];
 		const vsCodeType = configuration.get<string>('vsCodeType');
+		const typeArgs = vsCodeType ? ['--type', vsCodeType] : [];
+		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
+		const testFileGlob = configuration.get<string>('testFileGlob') || '**/ui-tests/**/*.test.ts';
 
-		// Ensure paths with spaces are properly quoted.
-		const quotedOutputPath = `"${outputPath}"`;
-		const quotedArgs = additionalArgs.map((arg) => `"${arg}"`).join(' ');
+		const outputPath = path.join(
+			workspaceFolder, 
+			outputFolder, 
+		);
+		const outputFilePattern = (testFileGlob?.split('/').pop() || testFileGlob).replace(/\.ts$/, '.js');
+		const fullOutputPath = path.join(outputPath, '**', outputFilePattern);
 
-		// Construct the shell execution command.
-		const shellExecution = new ShellExecution(`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`);
+		logger.info(`Resolved output path: ${fullOutputPath}`);
+
+		const shellExecution = new ShellExecution('npx', 
+			['extest',
+			'setup-and-run',
+			...versionArgs,
+			...typeArgs,
+			...additionalArgs,
+			`'${fullOutputPath}'`,
+			]
+		);
+
+		logger.info(`Running command: ${shellExecution}`);
 
 		super(TaskScope.Workspace, 'Run All Tests', shellExecution, logger);
 	}

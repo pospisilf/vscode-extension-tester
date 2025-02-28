@@ -19,6 +19,7 @@ import * as vscode from 'vscode';
 import { RunAllTestsTask } from '../tasks/RunAllTask';
 import { RunFileTask } from '../tasks/RunFileTask';
 import { Logger } from '../logger/logger';
+import { RunFolderTask } from '../tasks/RunFolderTask';
 
 /**
  * Registers test-related commands for the VS Code extension.
@@ -49,7 +50,7 @@ export function registerTestCommands(context: vscode.ExtensionContext, logger: L
 	context.subscriptions.push(
 		vscode.commands.registerCommand('extester-runner.runFolder', async (item) => {
 			logger.debug(`User triggered: extester-runner.runFolder for folder ${item.folderPath}.`);
-			const task = new RunFileTask(item.folderPath, logger);
+			const task = new RunFolderTask(item.folderPath, logger);
 			await task.execute();
 		}),
 	);

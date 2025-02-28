@@ -191,7 +191,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	/**
 	 * Groups test files by their parent folder.
-	 *
+	 *¨
 	 * @returns {Map<string, string[]>} - A mapping of folder names to their contained files.
 	 */
 	private groupFilesByFolder(): Map<string, string[]> {

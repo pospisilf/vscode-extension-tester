@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as vscode from 'vscode';
 import { ShellExecution, TaskScope, workspace } from 'vscode';
 import { TestRunner } from './TestRunnerTask';
 import * as path from 'path';
@@ -35,32 +36,46 @@ export class RunFileTask extends TestRunner {
 	 * compiled output location, and sets up the shell execution command.
 	 *
 	 * @param {string} file - The absolute path of the test file to be executed.
+ 	 * @param {Logger} logger - The logger instance for logging messages.
 	 */
 	constructor(file: string, logger: Logger) {
-		const configuration = workspace.getConfiguration('extesterRunner');
 
-		// Retrieve additional command-line arguments from configuration.
-		const additionalArgs: string[] = configuration.get<string[]>('additionalArgs', []);
+		const configuration = workspace.getConfiguration('extesterRunner');	
+	
 		const outputFolder = configuration.get<string>('outFolder') || 'out';
-		const workspaceFolder = workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+		const workspaceFolder = workspace.workspaceFolders?.[0]?.uri.fsPath;
+
+		if (!workspaceFolder) {
+			logger.error('No workspace folder found.');
+			vscode.window.showErrorMessage(`No workspace folder found.`);
+			throw new Error('No workspace folder found.');
+		} 
+
 		const vsCodeVersion = configuration.get<string>('vsCodeVersion');
-		const versionArg = vsCodeVersion ? `--code_version ${vsCodeVersion}` : '';
+		const versionArgs = vsCodeVersion ? ['--code_version', vsCodeVersion] : [];
 		const vsCodeType = configuration.get<string>('vsCodeType');
+		const typeArgs = vsCodeType ? ['--type', vsCodeType] : [];
+		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
 
-		// Convert file path to the correct output path.
-		const relativePath = path.relative(workspaceFolder, file);
-		const outputPath = path
-			.join(outputFolder, relativePath)
-			.replace(new RegExp(`\\b${path.sep}?src${path.sep}`, 'g'), `${outputFolder}${path.sep}`) // replace 'src/' correctly
-			.replace(/\.ts$/, '.js'); // convert '.ts' to '.js'
+		const outputPath = path.join(
+			workspaceFolder, 
+			outputFolder, 
+			path.relative(path.join(workspaceFolder, 'src'), file)
+		).replace(/\.ts$/, '.js');
 
-		// Ensure paths with spaces are properly quoted.
-		const escapeQuotes = (arg: string) => `"${arg.replace(/"/g, '\\"')}"`;
-		const quotedOutputPath = escapeQuotes(outputPath);
-		const quotedArgs = additionalArgs.map(escapeQuotes).join(' ');
+		logger.info(`Resolved output path: ${outputPath}`);
 
-		// Construct the shell execution command.
-		const shellExecution = new ShellExecution(`npx extest setup-and-run ${versionArg} --type ${vsCodeType} ${quotedArgs} ${quotedOutputPath}`);
+		const shellExecution = new ShellExecution('npx', 
+			['extest',
+			'setup-and-run',
+			...versionArgs,
+			...typeArgs,
+			...additionalArgs,
+			`'${outputPath}'`,
+			]
+		);
+
+		logger.info(`Running command: ${shellExecution}`);
 
 		super(TaskScope.Workspace, 'Run Test File', shellExecution, logger);
 	}
