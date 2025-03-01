@@ -59,8 +59,8 @@ export class RunAllTestsTask extends TestRunner {
 			workspaceFolder, 
 			outputFolder, 
 		);
-		const outputFilePattern = (testFileGlob?.split('/').pop() || testFileGlob).replace(/\.ts$/, '.js');
-		const fullOutputPath = path.join(outputPath, '**', outputFilePattern);
+		const outputFilePattern = (testFileGlob).replace(/\.ts$/, '.js');
+		const fullOutputPath = path.join(outputPath, outputFilePattern);
 
 		logger.info(`Resolved output path: ${fullOutputPath}`);
 
