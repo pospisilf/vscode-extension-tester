@@ -55,8 +55,12 @@ export class RunFolderTask extends TestRunner {
 		const versionArgs = visualStudioCodeVersion ? ['--code_version', visualStudioCodeVersion] : [];
 		const visualStudioCodeType = configuration.get<string>('visualStudioCodeType');
 		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];
-		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
 		const testFileGlob = configuration.get<string>('testFileGlob') || '**/ui-tests/**/*.test.ts';
+		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
+		const processedArgs = additionalArgs.flatMap(arg => {
+			const splitted = arg.split(/\s+/);
+			return splitted.map((word, index) => (index === 0 ? word : `'${word}'`));
+		});
 		
 		const outputPath = path.join(
 			workspaceFolder, 
@@ -73,7 +77,7 @@ export class RunFolderTask extends TestRunner {
 			'setup-and-run',
 			...versionArgs,
 			...typeArgs,
-			...additionalArgs,
+			...processedArgs,
 			`'${fullOutputPath}'`,
 			]
 		);

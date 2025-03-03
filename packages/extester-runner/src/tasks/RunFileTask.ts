@@ -56,6 +56,10 @@ export class RunFileTask extends TestRunner {
 		const visualStudioCodeType = configuration.get<string>('visualStudioCodeType');
 		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];
 		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
+		const processedArgs = additionalArgs.flatMap(arg => {
+			const splitted = arg.split(/\s+/);
+			return splitted.map((word, index) => (index === 0 ? word : `'${word}'`));
+		});
 
 		const outputPath = path.join(
 			workspaceFolder, 
@@ -70,7 +74,7 @@ export class RunFileTask extends TestRunner {
 			'setup-and-run',
 			...versionArgs,
 			...typeArgs,
-			...additionalArgs,
+			...processedArgs,
 			`'${outputPath}'`,
 			]
 		);
