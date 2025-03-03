@@ -11,7 +11,7 @@
     "directory": "packages/extester-runner"
   },
   "license": "Apache-2.0",
-  "version": "0.0.116",
+  "version": "0.0.117",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -144,7 +144,7 @@
       "extesterRunner": [
         {
           "id": "extesterView",
-          "name": "Test Explorer"
+          "name": "UI Tests"
         }
       ]
     },
