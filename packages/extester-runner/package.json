@@ -87,13 +87,13 @@
             "type": "string"
           }
         },
-        "extesterRunner.vsCodeVersion": {
+        "extesterRunner.visualStudioCodeVersion": {
           "type": "string",
           "default": "max",
           "scope": "resource",
           "markdownDescription": "Specifies the VS Code version. Options: `max`, `min`, `latest`, or a specific version (e.g., `1.97.1`). Default: `max` (max version supported by ExTester)."
         },
-        "extesterRunner.vsCodeType": {
+        "extesterRunner.visualStudioCodeType": {
           "type": "string",
           "enum": [
             "stable",

@@ -51,10 +51,10 @@ export class RunFolderTask extends TestRunner {
 			throw new Error('No workspace folder found.');
 		} 
 
-		const vsCodeVersion = configuration.get<string>('vsCodeVersion');
-		const versionArgs = vsCodeVersion ? ['--code_version', vsCodeVersion] : [];
-		const vsCodeType = configuration.get<string>('vsCodeType');
-		const typeArgs = vsCodeType ? ['--type', vsCodeType] : [];
+		const visualStudioCodeVersion = configuration.get<string>('visualStudioCodeVersion');
+		const versionArgs = visualStudioCodeVersion ? ['--code_version', visualStudioCodeVersion] : [];
+		const visualStudioCodeType = configuration.get<string>('visualStudioCodeType');
+		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];
 		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
 		const testFileGlob = configuration.get<string>('testFileGlob') || '**/ui-tests/**/*.test.ts';
 		
