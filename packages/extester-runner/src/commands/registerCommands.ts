@@ -21,6 +21,7 @@ import { registerViewCommands } from './viewCommands';
 import { registerFileCommands } from './fileCommands';
 import { ExtesterTreeProvider } from '../providers/extesterTreeProvider';
 import { Logger } from '../logger/logger';
+import { settingsWatcher } from '../utils/settingsWatcher';
 
 /**
  * Registers all extension commands within the VS Code extension.
@@ -39,4 +40,5 @@ export function registerCommands(context: vscode.ExtensionContext, treeDataProvi
 	registerTestCommands(context, logger);
 	registerViewCommands(context, treeDataProvider, logger);
 	registerFileCommands(context, logger);
+	settingsWatcher(context,treeDataProvider, logger);
 }
