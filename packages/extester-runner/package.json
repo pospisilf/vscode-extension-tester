@@ -89,9 +89,9 @@
         },
         "extesterRunner.vsCodeVersion": {
           "type": "string",
-          "default": "latest",
+          "default": "max",
           "scope": "resource",
-          "markdownDescription": "Specify the VS Code version options: `max`, `min`, `latest`, or custom (e.g., `1.97.1`). The default is `latest` (indicating the most recent release)."
+          "markdownDescription": "Specify the VS Code version options: `max`, `min`, `latest`, or custom (e.g., `1.97.1`). The default is `max` (indicating the max version supported by ExTester)."
         },
         "extesterRunner.vsCodeType": {
           "type": "string",
