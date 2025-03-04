@@ -75,10 +75,10 @@ export class RunFolderTask extends TestRunner {
 		const shellExecution = new ShellExecution('npx', 
 			['extest',
 			'setup-and-run',
+			`'${fullOutputPath}'`,
 			...versionArgs,
 			...typeArgs,
 			...processedArgs,
-			`'${fullOutputPath}'`,
 			]
 		);
 

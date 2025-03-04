@@ -72,10 +72,10 @@ export class RunFileTask extends TestRunner {
 		const shellExecution = new ShellExecution('npx', 
 			['extest',
 			'setup-and-run',
+			`'${outputPath}'`,
 			...versionArgs,
 			...typeArgs,
 			...processedArgs,
-			`'${outputPath}'`,
 			]
 		);
 
