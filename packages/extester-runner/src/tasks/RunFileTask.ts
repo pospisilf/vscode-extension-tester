@@ -118,8 +118,8 @@ export class RunFileTask extends TestRunner {
 		const versionArgs = visualStudioCodeVersion ? ['--code_version', visualStudioCodeVersion] : [];
 		const visualStudioCodeType = configuration.get<string>('visualStudioCodeType');
 		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];
-
 		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
+		const processedArgs = additionalArgs.flatMap(arg => arg.match(/(?:[^\s"]+|"[^"]*")+/g) || []);
 
 		const shellExecution = new ShellExecution('npx', 
 			['extest',
@@ -127,7 +127,7 @@ export class RunFileTask extends TestRunner {
 			`'${outputPath}'`,
 			...versionArgs,
 			...typeArgs,
-			...additionalArgs,
+			...processedArgs,
 			]
 		);
 

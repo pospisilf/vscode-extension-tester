@@ -120,10 +120,7 @@ export class RunFolderTask extends TestRunner {
 		const visualStudioCodeType = configuration.get<string>('visualStudioCodeType');
 		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];
 		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
-		const processedArgs = additionalArgs.flatMap(arg => {
-			const splitted = arg.split(/\s+/);
-			return splitted.map((word, index) => (index === 0 ? word : `'${word}'`));
-		});
+		const processedArgs = additionalArgs.flatMap(arg => arg.match(/(?:[^\s"]+|"[^"]*")+/g) || []);
 
 		logger.info(`Resolved output path: ${fullOutputPath}`);
 
