@@ -20,6 +20,7 @@ import { ShellExecution, TaskScope, workspace } from 'vscode';
 import { TestRunner } from './TestRunnerTask';
 import * as path from 'path';
 import { Logger } from '../logger/logger';
+import * as fs from 'fs';
 
 /**
  * Task for running a single test file within the workspace.
@@ -40,34 +41,85 @@ export class RunFileTask extends TestRunner {
 	 */
 	constructor(file: string, logger: Logger) {
 
-		const configuration = workspace.getConfiguration('extesterRunner');	
-	
-		const outputFolder = configuration.get<string>('outFolder') || 'out';
+		
 		const workspaceFolder = workspace.workspaceFolders?.[0]?.uri.fsPath;
-
 		if (!workspaceFolder) {
 			logger.error('No workspace folder found.');
 			vscode.window.showErrorMessage(`No workspace folder found.`);
 			throw new Error('No workspace folder found.');
-		} 
+		}
+
+		const configuration = workspace.getConfiguration('extesterRunner');	
+
+		// read tsconfig.json
+		const tsconfigFile = configuration.get<string>('tsconfig') || 'tsconfig.json';
+		const tsconfigPath = path.join(workspaceFolder, tsconfigFile);
+		let outDirSettings = configuration.get<string>('outFolder');
+		let rootDirSettings = configuration.get<string>('rootFolder');
+		logger.debug("OutDir from settings: " + outDirSettings); 
+		logger.debug("RootDir from settings: " + rootDirSettings); 
+		
+		let outDirJson;
+		let rootDirJson;
+
+		if (fs.existsSync(tsconfigPath)) {
+			try {
+				const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
+				if (tsconfig.compilerOptions) {
+					outDirJson = tsconfig.compilerOptions.outDir;
+					rootDirJson = tsconfig.compilerOptions.rootDir;
+				}
+			} catch (error) {
+				logger.error(`Error reading tsconfig.json: ${error}`);
+			}
+		} else {
+			logger.debug('tsconfig.json not exists');
+		}
+
+		logger.debug("OutDir from tsconfig.json: " + outDirJson);
+		logger.debug("RootDir from tsconfig.json: " + rootDirJson);
+
+		// default values
+		let outDir = 'out';
+		let rootDir: string | undefined = undefined;
+
+		// preference order: settings.json > tsconfig.json > default values
+		outDir = outDirSettings?.length ? outDirSettings : outDirJson?.length ? outDirJson : outDir;
+		rootDir = rootDirSettings?.length ? rootDirSettings : rootDirJson?.length ? rootDirJson : undefined; // can be undefined
+
+		let relativePath = path.relative(workspaceFolder, file);
+		let outputPath: string;
+		if (rootDir) {
+			const rootPath = path.join(workspaceFolder, rootDir);
+			if (file.startsWith(rootPath)) {
+				// preserve structure inside rootDir
+				relativePath = path.relative(rootPath, file);
+				outputPath = path.join(workspaceFolder,  outDir, relativePath);
+			} else {
+				// file is outside rootDir (e.g., `it-tests/`)
+				const fileName = path.basename(file);
+				outputPath = path.join(workspaceFolder, outDir, fileName);
+			}
+		} else {
+			// no rootDir defined - fallback to simple workspace-relative mapping
+			outputPath = path.join(workspaceFolder, outDir, relativePath);
+		}
+
+		outputPath = outputPath.replace(/\.ts$/, '.js');
+
+		logger.debug(`workspaceFolder: ${workspaceFolder}`);
+		logger.debug(`outDir: ${outDir}`);
+		logger.debug(`rootDir : ${rootDir || 'not set'}`);
+		logger.debug(`file: ${file}`);
+		logger.debug(`relativePath: ${relativePath}`);
+		logger.debug(`resolved output path: ${outputPath}`);
 
 		const visualStudioCodeVersion = configuration.get<string>('visualStudioCodeVersion');
 		const versionArgs = visualStudioCodeVersion ? ['--code_version', visualStudioCodeVersion] : [];
 		const visualStudioCodeType = configuration.get<string>('visualStudioCodeType');
 		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];
+
 		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
-		const processedArgs = additionalArgs.flatMap(arg => {
-			const splitted = arg.split(/\s+/);
-			return splitted.map((word, index) => (index === 0 ? word : `'${word}'`));
-		});
-
-		const outputPath = path.join(
-			workspaceFolder, 
-			outputFolder, 
-			path.relative(path.join(workspaceFolder, 'src'), file)
-		).replace(/\.ts$/, '.js');
-
-		logger.info(`Resolved output path: ${outputPath}`);
 
 		const shellExecution = new ShellExecution('npx', 
 			['extest',
@@ -75,11 +127,12 @@ export class RunFileTask extends TestRunner {
 			`'${outputPath}'`,
 			...versionArgs,
 			...typeArgs,
-			...processedArgs,
+			...additionalArgs,
 			]
 		);
 
-		logger.info(`Running command: ${shellExecution}`);
+		const commandString = `npx extest setup-and-run '${outputPath}' ${versionArgs.join(' ')} ${typeArgs.join(' ')} ${additionalArgs.join(' ')}`;
+		logger.info(`Running command: ${commandString}`);
 
 		super(TaskScope.Workspace, 'Run Test File', shellExecution, logger);
 	}

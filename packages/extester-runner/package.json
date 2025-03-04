@@ -11,7 +11,7 @@
     "directory": "packages/extester-runner"
   },
   "license": "Apache-2.0",
-  "version": "0.0.131",
+  "version": "0.0.150",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -59,9 +59,9 @@
         "properties": {
           "extesterRunner.testFileGlob": {
             "type": "string",
-            "default": "**/ui-tests/**/*.test.ts",
+            "default": "**/ui-test/**/*.test.ts",
             "scope": "resource",
-            "markdownDescription": "Glob pattern to locate test files in the workspace. Default: `**/ui-tests/**/*.test.ts`."
+            "markdownDescription": "Glob pattern to locate test files in the workspace. Default: `**/ui-test/**/*.test.ts`."
           },
           "extesterRunner.excludeGlob": {
             "type": "string",
@@ -71,6 +71,7 @@
           },
           "extesterRunner.ignorePathPart": {
             "type": "string",
+            "scope": "resource",
             "markdownDescription": "Pattern to hide specific segments of folder paths in the test view. Matching parts will be removed from displayed paths."
           }
         }
@@ -78,11 +79,21 @@
       {
         "title": "Command Line Settings",
         "properties": {
+          "extesterRunner.tsconfig": {
+            "type": "string",
+            "scope": "resource",
+            "default": "tsconfig.json",
+              "markdownDescription": "Specifies the TypeScript configuration file used for compilation. Default: `tsconfig.json`. This setting is used to determine `outDir` and `rootDir` from the TypeScript project configuration."
+          },
           "extesterRunner.outFolder": {
             "type": "string",
-            "default": "out",
             "scope": "resource",
-            "markdownDescription": "Specifies the folder where compiled test files (`*.js`) are stored. Default: `out`."
+            "markdownDescription": "Defines the output directory (`outDir`) where compiled JavaScript files are stored after TypeScript transpilation. If not explicitly set, the value is derived from `tsconfig.json` (if available). If `outDir` is undefined in both, `out` is used."
+          },
+          "extesterRunner.rootFolder": {
+            "type": "string",
+            "scope": "resource",
+            "markdownDescription": "Specifies the root directory (`rootDir`) of the TypeScript source files. If not explicitly set, the value is derived from `tsconfig.json` (if available). If `rootDir` is undefined, TypeScript infers it automatically."
           },
           "extesterRunner.visualStudioCodeVersion": {
             "type": "string",
