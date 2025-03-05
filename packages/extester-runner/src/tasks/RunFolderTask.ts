@@ -117,7 +117,7 @@ export class RunFolderTask extends TestRunner {
 
 		const visualStudioCodeVersion = configuration.get<string>('visualStudioCode.Version');
 		const versionArgs = visualStudioCodeVersion ? ['--code_version', visualStudioCodeVersion] : [];
-		const visualStudioCodeType = configuration.get<string>('visualStudioCodeType');
+		const visualStudioCodeType = configuration.get<string>('visualStudioCode.Type');
 		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];
 		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
 		const processedArgs = additionalArgs.flatMap(arg => arg.match(/(?:[^\s"]+|"[^"]*")+/g) || []);
