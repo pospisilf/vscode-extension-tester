@@ -55,7 +55,7 @@
     ],
     "configuration": [
       {
-        "title": "View Settings",
+        "title": "View",
         "properties": {
           "extesterRunner.testFileGlob": {
             "type": "string",
@@ -77,7 +77,7 @@
         }
       },
       {
-        "title": "Command Line Settings",
+        "title": "Command Line",
         "properties": {
           "extesterRunner.TSConfig": {
             "type": "string",
