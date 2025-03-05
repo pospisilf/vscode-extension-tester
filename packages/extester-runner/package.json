@@ -95,7 +95,7 @@
             "scope": "resource",
             "markdownDescription": "Specifies the root directory (`rootDir`) of the TypeScript source files. If not explicitly set, the value is derived from `tsconfig.json` (if available). If `rootDir` is undefined, TypeScript infers it automatically."
           },
-          "extesterRunner.visualStudioCodeVersion": {
+          "extesterRunner.visualStudioCode.Version": {
             "type": "string",
             "default": "max",
             "scope": "resource",

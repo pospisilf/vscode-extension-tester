@@ -103,7 +103,7 @@ export class RunAllTestsTask extends TestRunner {
 		logger.debug(`resolved output path: ${outputPath}`);
 
 
-		const visualStudioCodeVersion = configuration.get<string>('visualStudioCodeVersion');
+		const visualStudioCodeVersion = configuration.get<string>('visualStudioCode.Version');
 		const versionArgs = visualStudioCodeVersion ? ['--code_version', visualStudioCodeVersion] : [];
 		const visualStudioCodeType = configuration.get<string>('visualStudioCodeType');
 		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];

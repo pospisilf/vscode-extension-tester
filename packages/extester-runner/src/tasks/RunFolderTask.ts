@@ -115,7 +115,7 @@ export class RunFolderTask extends TestRunner {
 		logger.debug(`relativePath: ${relativePath}`);
 		logger.debug(`resolved output path: ${fullOutputPath}`);
 
-		const visualStudioCodeVersion = configuration.get<string>('visualStudioCodeVersion');
+		const visualStudioCodeVersion = configuration.get<string>('visualStudioCode.Version');
 		const versionArgs = visualStudioCodeVersion ? ['--code_version', visualStudioCodeVersion] : [];
 		const visualStudioCodeType = configuration.get<string>('visualStudioCodeType');
 		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];
