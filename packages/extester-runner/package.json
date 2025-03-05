@@ -79,7 +79,7 @@
       {
         "title": "Command Line Settings",
         "properties": {
-          "extesterRunner.tsconfig": {
+          "extesterRunner.TSConfig": {
             "type": "string",
             "scope": "resource",
             "default": "tsconfig.json",

@@ -49,7 +49,7 @@ export class RunAllTestsTask extends TestRunner {
 		}
 
 		// read tsconfig.json
-		const tsconfigFile = configuration.get<string>('tsconfig') || 'tsconfig.json';
+		const tsconfigFile = configuration.get<string>('TSConfig') || 'tsconfig.json';
 		const tsconfigPath = path.join(workspaceFolder, tsconfigFile);
 		let outDirSettings = configuration.get<string>('outFolder');
 		let rootDirSettings = configuration.get<string>('rootFolder');
