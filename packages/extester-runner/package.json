@@ -99,7 +99,7 @@
             "type": "string",
             "default": "max",
             "scope": "resource",
-            "markdownDescription": "Specifies the VS Code version. Options: `max`, `min`, `latest`, or a specific version (e.g., `1.97.1`). Default: `max` (max version supported by ExTester). This setting overrides any corresponding [environment variables](https://code.visualstudio.com/docs/reference/variables-reference#_environment-variables)."
+            "markdownDescription": "Specifies the VS Code version. Options: `max`, `min`, `latest`, or a specific version (e.g., `1.97.1`). Default: `max` (max version supported by ExTester). This setting overrides any corresponding [environment variables](https://github.com/redhat-developer/vscode-extension-tester/wiki/Test-Setup#useful-env-variables)."
           },
           "extesterRunner.visualStudioCode.Type": {
             "type": "string",
@@ -109,7 +109,7 @@
             ],
             "default": "stable",
             "scope": "resource",
-            "markdownDescription": "Defines the VS Code distribution. Use `stable` (default) for the official, fully tested release with monthly updates, or `insider` for a preview version with daily updates and experimental features (potentially unstable). See [VS Code Insiders page](https://code.visualstudio.com/insiders/) for more info. This setting overrides any corresponding [environment variables](https://code.visualstudio.com/docs/reference/variables-reference#_environment-variables)."
+            "markdownDescription": "Defines the VS Code distribution. Use `stable` (default) for the official, fully tested release with monthly updates, or `insider` for a preview version with daily updates and experimental features (potentially unstable). See [VS Code Insiders page](https://code.visualstudio.com/insiders/) for more info. This setting overrides any corresponding [environment variables](https://github.com/redhat-developer/vscode-extension-tester/wiki/Test-Setup#useful-env-variables)."
           },
           "extesterRunner.additionalArgs": {
             "type": "array",
