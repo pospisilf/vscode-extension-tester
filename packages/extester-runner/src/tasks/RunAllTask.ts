@@ -38,8 +38,7 @@ export class RunAllTestsTask extends TestRunner {
 	 * and sets up the command execution using `ShellExecution`.
 	 */
 	constructor(logger: Logger) {
-
-		const configuration = workspace.getConfiguration('extesterRunner');	
+		const configuration = workspace.getConfiguration('extesterRunner');
 		const workspaceFolder = workspace.workspaceFolders?.[0]?.uri.fsPath;
 
 		if (!workspaceFolder) {
@@ -53,9 +52,9 @@ export class RunAllTestsTask extends TestRunner {
 		const tsconfigPath = path.join(workspaceFolder, tsconfigFile);
 		let outDirSettings = configuration.get<string>('outFolder');
 		let rootDirSettings = configuration.get<string>('rootFolder');
-		logger.debug("OutDir from settings: " + outDirSettings); 
-		logger.debug("RootDir from settings: " + rootDirSettings); 
-		
+		logger.debug('OutDir from settings: ' + outDirSettings);
+		logger.debug('RootDir from settings: ' + rootDirSettings);
+
 		let outDirJson;
 		let rootDirJson;
 
@@ -73,8 +72,8 @@ export class RunAllTestsTask extends TestRunner {
 			logger.debug('tsconfig.json not exists');
 		}
 
-		logger.debug("OutDir from tsconfig.json: " + outDirJson);
-		logger.debug("RootDir from tsconfig.json: " + rootDirJson);
+		logger.debug('OutDir from tsconfig.json: ' + outDirJson);
+		logger.debug('RootDir from tsconfig.json: ' + rootDirJson);
 
 		// default values
 		let outDir = 'out';
@@ -102,23 +101,14 @@ export class RunAllTestsTask extends TestRunner {
 		logger.debug(`rootDir : ${rootDir || 'not set'}`);
 		logger.debug(`resolved output path: ${outputPath}`);
 
-
 		const visualStudioCodeVersion = configuration.get<string>('visualStudioCode.Version');
 		const versionArgs = visualStudioCodeVersion ? ['--code_version', visualStudioCodeVersion] : [];
 		const visualStudioCodeType = configuration.get<string>('visualStudioCode.Type');
 		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];
 		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
-		const processedArgs = additionalArgs.flatMap(arg => arg.match(/(?:[^\s"]+|"[^"]*")+/g) || []);
+		const processedArgs = additionalArgs.flatMap((arg) => arg.match(/(?:[^\s"]+|"[^"]*")+/g) || []);
 
-		const shellExecution = new ShellExecution('npx', 
-			['extest',
-			'setup-and-run',
-			`'${fullOutputPath}'`,
-			...versionArgs,
-			...typeArgs,
-			...processedArgs,
-			]
-		);
+		const shellExecution = new ShellExecution('npx', ['extest', 'setup-and-run', `'${fullOutputPath}'`, ...versionArgs, ...typeArgs, ...processedArgs]);
 
 		const commandString = `npx extest setup-and-run '${fullOutputPath}' ${versionArgs.join(' ')} ${typeArgs.join(' ')} ${additionalArgs.join(' ')}`;
 		logger.info(`Running command: ${commandString}`);

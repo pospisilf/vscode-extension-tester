@@ -40,5 +40,5 @@ export function registerCommands(context: vscode.ExtensionContext, treeDataProvi
 	registerTestCommands(context, logger);
 	registerViewCommands(context, treeDataProvider, logger);
 	registerFileCommands(context, logger);
-	settingsWatcher(context,treeDataProvider, logger);
+	settingsWatcher(context, treeDataProvider, logger);
 }

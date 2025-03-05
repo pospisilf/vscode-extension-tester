@@ -11,7 +11,7 @@
     "directory": "packages/extester-runner"
   },
   "license": "Apache-2.0",
-  "version": "0.0.151",
+  "version": "0.0.160",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -83,7 +83,7 @@
             "type": "string",
             "scope": "resource",
             "default": "tsconfig.json",
-              "markdownDescription": "Specifies the TypeScript configuration file used for compilation. Default: `tsconfig.json`. This setting is used to determine `outDir` and `rootDir` from the TypeScript project configuration."
+            "markdownDescription": "Specifies the TypeScript configuration file used for compilation. Default: `tsconfig.json`. This setting is used to determine `outDir` and `rootDir` from the TypeScript project configuration."
           },
           "extesterRunner.outFolder": {
             "type": "string",

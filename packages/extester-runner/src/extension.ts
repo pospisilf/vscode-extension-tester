@@ -43,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
 	logger.debug('Registering tree view.');
 	vscode.window.createTreeView('extesterView', {
 		treeDataProvider: treeDataProvider,
-		showCollapseAll: true
+		showCollapseAll: true,
 	});
 
 	// Register extension commands.

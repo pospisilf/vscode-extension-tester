@@ -37,11 +37,9 @@ export class RunFileTask extends TestRunner {
 	 * compiled output location, and sets up the shell execution command.
 	 *
 	 * @param {string} file - The absolute path of the test file to be executed.
- 	 * @param {Logger} logger - The logger instance for logging messages.
+	 * @param {Logger} logger - The logger instance for logging messages.
 	 */
 	constructor(file: string, logger: Logger) {
-
-		
 		const workspaceFolder = workspace.workspaceFolders?.[0]?.uri.fsPath;
 		if (!workspaceFolder) {
 			logger.error('No workspace folder found.');
@@ -49,16 +47,16 @@ export class RunFileTask extends TestRunner {
 			throw new Error('No workspace folder found.');
 		}
 
-		const configuration = workspace.getConfiguration('extesterRunner');	
+		const configuration = workspace.getConfiguration('extesterRunner');
 
 		// read tsconfig.json
 		const tsconfigFile = configuration.get<string>('TSConfig') || 'tsconfig.json';
 		const tsconfigPath = path.join(workspaceFolder, tsconfigFile);
 		let outDirSettings = configuration.get<string>('outFolder');
 		let rootDirSettings = configuration.get<string>('rootFolder');
-		logger.debug("OutDir from settings: " + outDirSettings); 
-		logger.debug("RootDir from settings: " + rootDirSettings); 
-		
+		logger.debug('OutDir from settings: ' + outDirSettings);
+		logger.debug('RootDir from settings: ' + rootDirSettings);
+
 		let outDirJson;
 		let rootDirJson;
 
@@ -76,8 +74,8 @@ export class RunFileTask extends TestRunner {
 			logger.debug('tsconfig.json not exists');
 		}
 
-		logger.debug("OutDir from tsconfig.json: " + outDirJson);
-		logger.debug("RootDir from tsconfig.json: " + rootDirJson);
+		logger.debug('OutDir from tsconfig.json: ' + outDirJson);
+		logger.debug('RootDir from tsconfig.json: ' + rootDirJson);
 
 		// default values
 		let outDir = 'out';
@@ -94,7 +92,7 @@ export class RunFileTask extends TestRunner {
 			if (file.startsWith(rootPath)) {
 				// preserve structure inside rootDir
 				relativePath = path.relative(rootPath, file);
-				outputPath = path.join(workspaceFolder,  outDir, relativePath);
+				outputPath = path.join(workspaceFolder, outDir, relativePath);
 			} else {
 				// file is outside rootDir (e.g., `it-tests/`)
 				const fileName = path.basename(file);
@@ -119,17 +117,9 @@ export class RunFileTask extends TestRunner {
 		const visualStudioCodeType = configuration.get<string>('visualStudioCode.Type');
 		const typeArgs = visualStudioCodeType ? ['--type', visualStudioCodeType] : [];
 		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
-		const processedArgs = additionalArgs.flatMap(arg => arg.match(/(?:[^\s"]+|"[^"]*")+/g) || []);
+		const processedArgs = additionalArgs.flatMap((arg) => arg.match(/(?:[^\s"]+|"[^"]*")+/g) || []);
 
-		const shellExecution = new ShellExecution('npx', 
-			['extest',
-			'setup-and-run',
-			`'${outputPath}'`,
-			...versionArgs,
-			...typeArgs,
-			...processedArgs,
-			]
-		);
+		const shellExecution = new ShellExecution('npx', ['extest', 'setup-and-run', `'${outputPath}'`, ...versionArgs, ...typeArgs, ...processedArgs]);
 
 		const commandString = `npx extest setup-and-run '${outputPath}' ${versionArgs.join(' ')} ${typeArgs.join(' ')} ${additionalArgs.join(' ')}`;
 		logger.info(`Running command: ${commandString}`);

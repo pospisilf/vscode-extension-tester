@@ -23,25 +23,21 @@ import { ExtesterTreeProvider } from '../providers/extesterTreeProvider';
  * Registers a settings watcher to detect configuration changes related to `extesterRunner`
  * and trigger a refresh of the view.
  *
- * This function listens for workspace configuration changes and refreshes the test explorer 
- * whenever any setting under `extesterRunner` is updated. Ensures that updates to user-defined 
+ * This function listens for workspace configuration changes and refreshes the test explorer
+ * whenever any setting under `extesterRunner` is updated. Ensures that updates to user-defined
  * settings are applied without requiring a manual reload.
  *
  * @param context - The extension context used to register disposables.
  * @param treeDataProvider - The tree data provider responsible for managing the test explorer view.
  * @param logger - Logger instance for logging configuration changes.
  */
-export function settingsWatcher(
-    context: vscode.ExtensionContext,
-    treeDataProvider: ExtesterTreeProvider,
-    logger: Logger
-) {
-    context.subscriptions.push(
-        vscode.workspace.onDidChangeConfiguration((event) => {
-            if (event.affectsConfiguration("extesterRunner")) {
-                logger.info('Setting was changed, refreshing view.');
-                treeDataProvider.refresh();
-            }
-        })
-    );
-};
+export function settingsWatcher(context: vscode.ExtensionContext, treeDataProvider: ExtesterTreeProvider, logger: Logger) {
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeConfiguration((event) => {
+			if (event.affectsConfiguration('extesterRunner')) {
+				logger.info('Setting was changed, refreshing view.');
+				treeDataProvider.refresh();
+			}
+		}),
+	);
+}
