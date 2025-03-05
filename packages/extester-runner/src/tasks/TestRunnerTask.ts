@@ -49,6 +49,7 @@ export abstract class TestRunner extends Task {
 		super(taskDefinition, scope, label, 'extester-runner', shellExecution);
 		this.label = label;
 		this.logger = logger;
+		this.presentationOptions.echo = false; // hide command in terminal
 		this.presentationOptions.clear = true; // clean terminal output before each execution
 	}
 
