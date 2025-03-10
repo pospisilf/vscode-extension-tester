@@ -16,27 +16,27 @@
  */
 
 import * as vscode from 'vscode';
-import { ExtesterTreeProvider } from '../providers/extesterTreeProvider';
 import { Logger } from '../logger/logger';
+import { LogsTreeProvider } from '../providers/logsTreeProvider';
 
 /**
- * Registers view-related commands for the VS Code extension.
+ * Registers Logs view related commands for the VS Code extension.
  *
- * This function registers commands for refreshing the test tree view.
+ * This function registers commands for refreshing the logs tree view.
  *
  * @param {vscode.ExtensionContext} context - The extension context, used for registering commands.
- * @param {ExtesterTreeProvider} treeDataProvider - The tree data provider responsible for managing the test view.
+ * @param {LogsTreeProvider} logsDataProvider - The tree data provider responsible for managing the logs view.
  * @param {Logger} logger - The logging utility for debugging and tracking command execution.
  */
-export function registerViewCommands(context: vscode.ExtensionContext, treeDataProvider: ExtesterTreeProvider, logger: Logger) {
+export function registerLogsCommands(context: vscode.ExtensionContext, logsDataProvider: LogsTreeProvider, logger: Logger) {
 	/**
-	 * Registers the `extester-runner.refreshTests` command.
-	 * This command refreshes the test tree view by triggering an update on the tree data provider.
+	 * Registers the `extester-runner.refreshLogs` command.
+	 * This command refreshes the test logs view by triggering an update on the tree data provider.
 	 */
-	context.subscriptions.push(
-		vscode.commands.registerCommand('extester-runner.refreshTests', async () => {
-			logger.debug('User triggered: extester-runner.refreshTests');
-			treeDataProvider.refresh();
-		}),
-	);
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extester-runner.refreshLogs', async () => {
+            logger.debug('User triggered: extester-runner.refreshLogs');
+            logsDataProvider.refresh();
+        }),
+    );
 }

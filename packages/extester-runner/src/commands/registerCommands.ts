@@ -22,6 +22,10 @@ import { registerFileCommands } from './fileCommands';
 import { ExtesterTreeProvider } from '../providers/extesterTreeProvider';
 import { Logger } from '../logger/logger';
 import { settingsWatcher } from '../utils/settingsWatcher';
+import { ScreenshotsTreeProvider } from '../providers/screenshotsTreeProvider';
+import { LogsTreeProvider } from '../providers/logsTreeProvider';
+import { registerScreenshotsCommands } from './screenshotsCommands';
+import { registerLogsCommands } from './logsCommands';
 
 /**
  * Registers all extension commands within the VS Code extension.
@@ -35,10 +39,12 @@ import { settingsWatcher } from '../utils/settingsWatcher';
  * @param {ExtesterTreeProvider} treeDataProvider - The tree data provider for managing extension views.
  * @param {Logger} logger - The logging utility for debugging and error tracking.
  */
-export function registerCommands(context: vscode.ExtensionContext, treeDataProvider: ExtesterTreeProvider, logger: Logger) {
+export function registerCommands(context: vscode.ExtensionContext, treeDataProvider: ExtesterTreeProvider, screenshotsDataProvider: ScreenshotsTreeProvider, logsDataProvider: LogsTreeProvider, logger: Logger) {
 	logger.debug('Registering commands.');
 	registerTestCommands(context, logger);
 	registerViewCommands(context, treeDataProvider, logger);
 	registerFileCommands(context, logger);
-	settingsWatcher(context, treeDataProvider, logger);
+	registerScreenshotsCommands(context, screenshotsDataProvider, logger);
+	registerLogsCommands(context, logsDataProvider, logger);
+	settingsWatcher(context, treeDataProvider, screenshotsDataProvider, logsDataProvider, logger);
 }

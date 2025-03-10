@@ -18,6 +18,8 @@
 import * as vscode from 'vscode';
 import { Logger } from '../logger/logger';
 import { ExtesterTreeProvider } from '../providers/extesterTreeProvider';
+import { ScreenshotsTreeProvider } from '../providers/screenshotsTreeProvider';
+import { LogsTreeProvider } from '../providers/logsTreeProvider';
 
 /**
  * Registers a settings watcher to detect configuration changes related to `extesterRunner`
@@ -31,12 +33,14 @@ import { ExtesterTreeProvider } from '../providers/extesterTreeProvider';
  * @param treeDataProvider - The tree data provider responsible for managing the test explorer view.
  * @param logger - Logger instance for logging configuration changes.
  */
-export function settingsWatcher(context: vscode.ExtensionContext, treeDataProvider: ExtesterTreeProvider, logger: Logger) {
+export function settingsWatcher(context: vscode.ExtensionContext, treeDataProvider: ExtesterTreeProvider, screenshotsDataProvider: ScreenshotsTreeProvider, logsDataProvider: LogsTreeProvider, logger: Logger) {
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration((event) => {
 			if (event.affectsConfiguration('extesterRunner')) {
-				logger.info('Setting was changed, refreshing view.');
+				logger.info('Setting was changed, refreshing views.');
 				treeDataProvider.refresh();
+				logsDataProvider.refresh();
+				screenshotsDataProvider.refresh();
 			}
 		}),
 	);

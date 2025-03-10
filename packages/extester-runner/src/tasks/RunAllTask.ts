@@ -52,8 +52,10 @@ export class RunAllTestsTask extends TestRunner {
 		const tsconfigPath = path.join(workspaceFolder, tsconfigFile);
 		let outDirSettings = configuration.get<string>('outFolder');
 		let rootDirSettings = configuration.get<string>('rootFolder');
+		let tempDirSettings = configuration.get<string>('tempFolder');
 		logger.debug('OutDir from settings: ' + outDirSettings);
 		logger.debug('RootDir from settings: ' + rootDirSettings);
+		logger.debug('TempDir from settings: ' + tempDirSettings);
 
 		let outDirJson;
 		let rootDirJson;
@@ -101,6 +103,7 @@ export class RunAllTestsTask extends TestRunner {
 		logger.debug(`rootDir : ${rootDir || 'not set'}`);
 		logger.debug(`resolved output path: ${outputPath}`);
 
+		const storageArgs = tempDirSettings && tempDirSettings.trim().length > 0 ? ['--storage', `'${tempDirSettings}'`] : [];
 		const visualStudioCodeVersion = configuration.get<string>('visualStudioCode.Version');
 		const versionArgs = visualStudioCodeVersion ? ['--code_version', visualStudioCodeVersion] : [];
 		const visualStudioCodeType = configuration.get<string>('visualStudioCode.Type');
@@ -108,9 +111,9 @@ export class RunAllTestsTask extends TestRunner {
 		const additionalArgs = configuration.get<string[]>('additionalArgs', []) || [];
 		const processedArgs = additionalArgs.flatMap((arg) => arg.match(/(?:[^\s"]+|"[^"]*")+/g) || []);
 
-		const shellExecution = new ShellExecution('npx', ['extest', 'setup-and-run', `'${fullOutputPath}'`, ...versionArgs, ...typeArgs, ...processedArgs]);
+		const shellExecution = new ShellExecution('npx', ['extest', 'setup-and-run', `'${fullOutputPath}'`, ...storageArgs, ...versionArgs, ...typeArgs, ...processedArgs]);
 
-		const commandString = `npx extest setup-and-run '${fullOutputPath}' ${versionArgs.join(' ')} ${typeArgs.join(' ')} ${additionalArgs.join(' ')}`;
+		const commandString = `npx extest setup-and-run '${fullOutputPath}' ${storageArgs.join(' ')} ${versionArgs.join(' ')} ${typeArgs.join(' ')} ${additionalArgs.join(' ')}`;
 		logger.info(`Running command: ${commandString}`);
 
 		super(TaskScope.Workspace, 'Run All Tests', shellExecution, logger);

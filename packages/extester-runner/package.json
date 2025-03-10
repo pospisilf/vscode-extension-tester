@@ -11,7 +11,7 @@
     "directory": "packages/extester-runner"
   },
   "license": "Apache-2.0",
-  "version": "0.0.160",
+  "version": "0.0.200",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -85,6 +85,11 @@
             "default": "tsconfig.json",
             "markdownDescription": "Specifies the TypeScript configuration file used for compilation. Default: `tsconfig.json`. This setting is used to determine `outDir` and `rootDir` from the TypeScript project configuration."
           },
+          "extesterRunner.tempFolder": {
+            "type": "string",
+            "scope": "resource",
+            "markdownDescription": "Specifies the directory for temporary files used by ExTester. If undefined, the default system temporary folder is used. This setting overrides any corresponding [environment variables](https://github.com/redhat-developer/vscode-extension-tester/wiki/Test-Setup#useful-env-variables)."
+          },
           "extesterRunner.outFolder": {
             "type": "string",
             "scope": "resource",
@@ -121,6 +126,16 @@
             }
           }
         }
+      },
+      {
+        "title": "Logs",
+        "properties": {
+          "extesterRunner.hideEmptyLogFolders": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Hides empty log directories in the test results. If enabled (`true`), only folders containing any log files will be displayed. If disabled (`false`), all log folders, including empty ones, will be visible."
+          }
+        }
       }
     ],
     "commands": [
@@ -147,6 +162,18 @@
         "icon": "$(run-below)",
         "title": "Run Folder",
         "tooltip": "Run all test files inside folder."
+      },
+      {
+        "command": "extester-runner.refreshScreenshots",
+        "title": "Refresh Screenshots",
+        "icon": "$(refresh)",
+        "tooltip": "Refresh list of screenshots."
+      },
+      {
+        "command": "extester-runner.refreshLogs",
+        "title": "Refresh Logs",
+        "icon": "$(refresh)",
+        "tooltip": "Refresh list of logs."
       }
     ],
     "viewsContainers": {
@@ -163,6 +190,14 @@
         {
           "id": "extesterView",
           "name": "UI Tests"
+        },
+        {
+          "id": "extesterResourcesScreenshotsView",
+          "name": "Screenshots"
+        },
+        {
+          "id": "extesterResourcesLogsView",
+          "name": "Logs"
         }
       ]
     },
@@ -177,6 +212,16 @@
           "command": "extester-runner.runAll",
           "when": "view == extesterView && extesterRunner.hasTestFiles",
           "group": "navigation@2"
+        },
+        {
+          "command": "extester-runner.refreshLogs",
+          "when": "view == extesterResourcesLogsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "extester-runner.refreshScreenshots",
+          "when": "view == extesterResourcesScreenshotsView",
+          "group": "navigation@1"
         }
       ],
       "view/item/context": [
