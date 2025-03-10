@@ -18,6 +18,7 @@
 import * as vscode from 'vscode';
 import { Logger } from '../logger/logger';
 import { ExtesterTreeProvider } from '../providers/extesterTreeProvider';
+import { minimatch } from 'minimatch';
 
 /**
  * Creates a file system watcher to monitor changes in the workspace.
@@ -35,28 +36,50 @@ export function createFileWatcher(context: vscode.ExtensionContext, treeDataProv
 
 	const watcher = vscode.workspace.createFileSystemWatcher('**/*'); // watch all files in the workspace
 
+	const configuration = vscode.workspace.getConfiguration('extesterRunner');
+	const testFileGlob = configuration.get<string>('testFileGlob') || '**/*.test.ts';
+	const excludeGlob = configuration.get<string>('excludeGlob') || '**/node_modules/**';
+
+	function shouldRefresh(uri: vscode.Uri): boolean {
+		const relativePath = vscode.workspace.asRelativePath(uri);
+		return minimatch(relativePath, testFileGlob) && !minimatch(relativePath, excludeGlob);
+	}
+	
 	/**
 	 * Event listener for file creation.
 	 */
 	watcher.onDidCreate((uri) => {
-		logger.info(`File created: ${uri.fsPath}`);
-		treeDataProvider.refresh();
+		if (shouldRefresh(uri)) {
+			logger.info(`Relevant file created: ${uri.fsPath}`);
+			treeDataProvider.refresh();
+		} else {
+			logger.debug(`Ignored file created: ${uri.fsPath}`);
+		}
 	});
 
 	/**
 	 * Event listener for file deletion.
 	 */
-	watcher.onDidDelete((uri) => {
-		logger.info(`File deleted: ${uri.fsPath}`);
-		treeDataProvider.refresh();
+	watcher.onDidChange((uri) => {
+		if (shouldRefresh(uri)) {
+			logger.info(`Relevant file changed: ${uri.fsPath}`);
+			treeDataProvider.refresh();
+		} else {
+			logger.debug(`Ignored file changed: ${uri.fsPath}`);
+		}
 	});
+
 
 	/**
 	 * Event listener for file modification.
 	 */
-	watcher.onDidChange((uri) => {
-		logger.info(`File changed: ${uri.fsPath}`);
-		treeDataProvider.refresh();
+	watcher.onDidDelete((uri) => {
+		if (shouldRefresh(uri)) {
+			logger.info(`Relevant file deleted: ${uri.fsPath}`);
+			treeDataProvider.refresh();
+		} else {
+			logger.debug(`Ignored file deleted: ${uri.fsPath}`);
+		}
 	});
 
 	// Register the watcher for automatic disposal when the extension is deactivated.
