@@ -98,7 +98,7 @@ export class ExtesterTreeProvider implements vscode.TreeDataProvider<TreeItem> {
 		if (!element) {
 			// If no files found, put info message to view.
 			if (!this.hasTestFiles) {
-				const noFilesItem = new TreeItem('No test files found', vscode.TreeItemCollapsibleState.None, false);
+				const noFilesItem = new TreeItem('No tests', vscode.TreeItemCollapsibleState.None, false);
 				noFilesItem.contextValue = 'noFiles';
 				noFilesItem.iconPath = new vscode.ThemeIcon('warning');
 				return [noFilesItem];

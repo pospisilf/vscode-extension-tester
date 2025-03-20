@@ -109,7 +109,7 @@ export class LogsTreeProvider implements vscode.TreeDataProvider<LogsResourcesIt
         if (!fs.existsSync(dirPath)) {
             this.logger.debug(`Directory does not exist: ${dirPath}`);
             // return [];
-            return [new LogsResourcesItem("No log files", "", false, true)];
+            return [new LogsResourcesItem("No logs", "", false, true)];
         }
 
         const entries = fs.readdirSync(dirPath, { withFileTypes: true });
@@ -129,24 +129,10 @@ export class LogsTreeProvider implements vscode.TreeDataProvider<LogsResourcesIt
         .filter(Boolean) as LogsResourcesItem[];
 
     if (items.length === 0) {
-        return [new LogsResourcesItem("No log files", "", false, true)];
+        return [new LogsResourcesItem("No logs", "", false, true)];
     }
 
     return items;
-
-        // return entries
-        //     .map(entry => {
-        //         const entryPath = path.join(dirPath, entry.name);
-        //         const isDir = entry.isDirectory();
-        //         const isEmpty = isDir && fs.readdirSync(entryPath).length === 0;
-
-        //         if (hideEmptyFolders && isDir && isEmpty) {
-        //             return null;
-        //         }
-
-        //         return new LogsResourcesItem(entry.name, entryPath, isDir, isEmpty);
-        //     })
-        //     .filter(Boolean) as LogsResourcesItem[];
     }
 }
 

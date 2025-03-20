@@ -105,13 +105,13 @@ export class ScreenshotsTreeProvider implements vscode.TreeDataProvider<Screensh
 
         if (!fs.existsSync(dirPath)) {
             this.logger.debug(`Directory does not exist: ${dirPath}`);
-            return [new ScreenshotsResourcesItem("No screenshots files", "")];
+            return [new ScreenshotsResourcesItem("No screenshots", "")];
         }
 
         const files = await fs.promises.readdir(dirPath);
 
         if (files.length === 0) {
-            return [new ScreenshotsResourcesItem("No screenshots files", "")];
+            return [new ScreenshotsResourcesItem("No screenshots", "")];
         }
 
         return files.map(file => new ScreenshotsResourcesItem(
