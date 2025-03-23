@@ -18,7 +18,8 @@
 import * as vscode from 'vscode';
 import { Logger } from '../logger/logger';
 import { ExtesterTreeProvider } from '../providers/extesterTreeProvider';
-import { minimatch } from 'minimatch';
+
+let watcher: vscode.FileSystemWatcher | undefined;
 
 /**
  * Creates a file system watcher to monitor changes in the workspace.
@@ -32,41 +33,32 @@ import { minimatch } from 'minimatch';
  * @param {Logger} logger - The logging utility for debugging and tracking file system events.
  */
 export function createFileWatcher(context: vscode.ExtensionContext, treeDataProvider: ExtesterTreeProvider, logger: Logger) {
-	logger.debug('Creating file system watcher');
+	if (watcher) {
+		watcher.dispose();
+		logger.debug('Disposed previous file watcher');
+	}
 
-	const watcher = vscode.workspace.createFileSystemWatcher('**/*'); // watch all files in the workspace
+	logger.debug('Creating file system watcher');
 
 	const configuration = vscode.workspace.getConfiguration('extesterRunner');
 	const testFileGlob = configuration.get<string>('testFileGlob') || '**/*.test.ts';
-	const excludeGlob = configuration.get<string>('excludeGlob') || '**/node_modules/**';
 
-	function shouldRefresh(uri: vscode.Uri): boolean {
-		const relativePath = vscode.workspace.asRelativePath(uri);
-		return minimatch(relativePath, testFileGlob) && !minimatch(relativePath, excludeGlob);
-	}
-	
+	watcher = vscode.workspace.createFileSystemWatcher(testFileGlob);
+
 	/**
 	 * Event listener for file creation.
 	 */
 	watcher.onDidCreate((uri) => {
-		if (shouldRefresh(uri)) {
-			logger.info(`Relevant file created: ${uri.fsPath}`);
-			treeDataProvider.refresh();
-		} else {
-			logger.debug(`Ignored file created: ${uri.fsPath}`);
-		}
+		logger.info(`Relevant file created: ${uri.fsPath}`);
+		treeDataProvider.refresh();
 	});
 
 	/**
 	 * Event listener for file deletion.
 	 */
 	watcher.onDidChange((uri) => {
-		if (shouldRefresh(uri)) {
-			logger.info(`Relevant file changed: ${uri.fsPath}`);
-			treeDataProvider.refresh();
-		} else {
-			logger.debug(`Ignored file changed: ${uri.fsPath}`);
-		}
+		logger.info(`Relevant file changed: ${uri.fsPath}`);
+		treeDataProvider.refresh();
 	});
 
 
@@ -74,12 +66,8 @@ export function createFileWatcher(context: vscode.ExtensionContext, treeDataProv
 	 * Event listener for file modification.
 	 */
 	watcher.onDidDelete((uri) => {
-		if (shouldRefresh(uri)) {
-			logger.info(`Relevant file deleted: ${uri.fsPath}`);
-			treeDataProvider.refresh();
-		} else {
-			logger.debug(`Ignored file deleted: ${uri.fsPath}`);
-		}
+		logger.info(`Relevant file deleted: ${uri.fsPath}`);
+		treeDataProvider.refresh();
 	});
 
 	// Register the watcher for automatic disposal when the extension is deactivated.

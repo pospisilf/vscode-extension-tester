@@ -20,6 +20,9 @@ import { Logger } from '../logger/logger';
 import { ExtesterTreeProvider } from '../providers/extesterTreeProvider';
 import { ScreenshotsTreeProvider } from '../providers/screenshotsTreeProvider';
 import { LogsTreeProvider } from '../providers/logsTreeProvider';
+import { createScreenshotsWatcher } from './screenshotsWatcher';
+import { createLogsWatcher } from './logWatcher';
+import { createFileWatcher } from './fileWatcher';
 
 /**
  * Registers a settings watcher to detect configuration changes related to `extesterRunner`
@@ -41,6 +44,17 @@ export function settingsWatcher(context: vscode.ExtensionContext, treeDataProvid
 				treeDataProvider.refresh();
 				logsDataProvider.refresh();
 				screenshotsDataProvider.refresh();
+
+				if (event.affectsConfiguration('extesterRunner.tempFolder')) {
+                    logger.info('tempFolder setting changed — resetting screenshots and logs watcher');
+                    createScreenshotsWatcher(context, screenshotsDataProvider, logger);
+					createLogsWatcher(context, logsDataProvider, logger);
+                }
+
+				if (event.affectsConfiguration('extesterRunner.testFileGlob')) {
+					logger.info('testFileGlob setting changed — resetting file watcher');
+                    createFileWatcher(context, treeDataProvider, logger);
+				}
 			}
 		}),
 	);

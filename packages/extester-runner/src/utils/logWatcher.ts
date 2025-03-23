@@ -4,6 +4,8 @@ import { LogsTreeProvider } from '../providers/logsTreeProvider';
 import path from 'path';
 import * as fs from 'fs';
 
+let watcher: vscode.FileSystemWatcher | undefined;
+
 /**
  * Creates a file system watcher to monitor changes in the logs folder.
  *
@@ -16,6 +18,11 @@ import * as fs from 'fs';
  * @param {Logger} logger - The logging utility for debugging and tracking file system events.
  */
 export function createLogsWatcher(context: vscode.ExtensionContext, logsDataProvider: LogsTreeProvider, logger: Logger) {
+    if (watcher) {
+        watcher.dispose();
+        logger.debug('Disposed previous logs watcher');
+    }
+    
     logger.debug('Creating logs system watcher');
 
     const configuration = vscode.workspace.getConfiguration('extesterRunner');
@@ -43,7 +50,7 @@ export function createLogsWatcher(context: vscode.ExtensionContext, logsDataProv
 
     logger.info(`Watching logs directory: ${logsDirectory}`);
 
-    const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(logsDirectory, '**/*'));
+    watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(logsDirectory, '**/*'));
     
     /**
      * Event listener for file creation.

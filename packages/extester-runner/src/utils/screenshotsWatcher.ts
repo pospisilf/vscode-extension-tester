@@ -4,6 +4,8 @@ import path from 'path';
 import * as fs from 'fs';
 import { ScreenshotsTreeProvider } from '../providers/screenshotsTreeProvider';
 
+let watcher: vscode.FileSystemWatcher | undefined;
+
 /**
  * Creates a file system watcher to monitor changes in the screenshots folder.
  *
@@ -16,7 +18,12 @@ import { ScreenshotsTreeProvider } from '../providers/screenshotsTreeProvider';
  * @param {Logger} logger - The logging utility for debugging and tracking file system events.
  */
 export function createScreenshotsWatcher(context: vscode.ExtensionContext, screenshotsDataProvider: ScreenshotsTreeProvider, logger: Logger) {
-    logger.debug('Creating logs system watcher');
+    if (watcher) {
+        watcher.dispose();
+        logger.debug('Disposed previous screenshots watcher');
+    }
+    
+    logger.debug('Creating screenshots system watcher');
 
     const configuration = vscode.workspace.getConfiguration('extesterRunner');
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
@@ -43,7 +50,7 @@ export function createScreenshotsWatcher(context: vscode.ExtensionContext, scree
 
     logger.info(`Watching screenshots directory: ${screenshotsDirectory}`);
 
-    const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(screenshotsDirectory, '**/*'));
+    watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(screenshotsDirectory, '**/*'));
     
     /**
      * Event listener for file creation.
