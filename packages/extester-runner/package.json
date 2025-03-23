@@ -200,15 +200,18 @@
       "extesterRunner": [
         {
           "id": "extesterView",
-          "name": "UI Tests"
+          "name": "UI Tests",
+          "initialSize": 2
         },
         {
           "id": "extesterResourcesScreenshotsView",
-          "name": "Screenshots"
+          "name": "Screenshots",
+          "initialSize": 1
         },
         {
           "id": "extesterResourcesLogsView",
-          "name": "Logs"
+          "name": "Logs",
+          "initialSize": 1
         }
       ]
     },
