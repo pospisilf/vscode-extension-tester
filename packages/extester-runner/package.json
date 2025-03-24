@@ -11,7 +11,7 @@
     "directory": "packages/extester-runner"
   },
   "license": "Apache-2.0",
-  "version": "0.0.205",
+  "version": "0.0.250",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -21,6 +21,58 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+
+    "walkthroughs": [
+      {
+        "id": "extester-runner.gettingStarted",
+        "title": "Get started with ExTester Runner",
+        "description": "Step-by-step guide to quickly setu up and start using ExTerster Runner",
+        "steps": [
+          {
+            "id": "setTsConfig",
+            "title": "Configure TypeScript (tsconfig.json)",
+            "description": "Set the location of your [tsconfig.json](command:workbench.action.openSettings?%22extesterRunner.TSConfig%22) file to define how your tests are compiled.",
+            "media": { "image": "resources/walkthroughs/setTsConfig.png", "altText": "Configure TypeScript (tsconfig.json)" },
+            "completionEvents": ["onSettingChanged:extesterRunner.TSConfig"]
+          },
+          {
+            "id": "setRootOut",
+            "title": "(Optional) Set Root and Output Directories",
+            "description": "Root and out directories are loaded from TS Config file but optionally you override this and sets different [root](command:workbench.action.openSettings?%22extesterRunner.rootFolder%22) and [out](command:workbench.action.openSettings?%22extesterRunner.outFolder%22) for test compilation.",
+            "media": { "image": "resources/walkthroughs/setRootOut.png", "altText": "Set Root and Output directories" },
+            "completionEvents": ["onCommand:workbench.action.openSettings"]
+          },
+          {
+            "id": "setTestFileGlob",
+            "title": "Specify Test File Pattern",
+            "description": "Define the glob pattern for locating your test files using [testFileGlob](command:workbench.action.openSettings?%22extesterRunner.testFileGlob%22).",
+            "media": { "image": "resources/walkthroughs/setTestFileGlob.png", "altText": "Specify Test File Pattern" },
+            "completionEvents": ["onSettingChanged:extesterRunner.testFileGlob"]
+          },
+          {
+            "id": "setExcludeGlob",
+            "title": "Set Excluded Paths",
+            "description": "Define paths to exclude from your test file search with [excludeGlob](command:workbench.action.openSettings?%22extesterRunner.excludeGlob%22).",
+            "media": { "image": "resources/walkthroughs/setExcludeGlob.png", "altText": "Set Excluded Paths" },
+            "completionEvents": ["onSettingChanged:extesterRunner.excludeGlob"]
+          },
+          {
+            "id": "setIgnorePathPart",
+            "title": "(Optional) Customize Displayed Path Segments",
+            "description": "Optionally configure segments of paths to ignore in test views using [ignorePathPart](command:workbench.action.openSettings?%22extesterRunner.ignorePathPart%22).",
+            "media": { "image": "resources/walkthroughs/setIgnorePathPart.png", "altText": "Customize Displayed Path Segments" },
+            "completionEvents": ["onCommand:workbench.action.openSettings"]
+          },
+          {
+            "id": "setOther",
+            "title": "Explore Additional Settings",
+            "description": "Explore more configuration options available in the [settings](command:workbench.action.openSettings?%22extesterRunner%22).",
+            "media": { "image": "resources/walkthroughs/setOther.png", "altText": "Explore Additional Settings" },
+            "completionEvents": ["onCommand:workbench.action.openSettings"]
+          }
+        ]
+      }
+    ],
     "taskDefinitions": [
       {
         "type": "extester-runner-task",
