@@ -86,9 +86,12 @@ Command Line Settings:
     VS Code type changes type used for execution
     VS Code version changes version used for execution
 Logs View settings:
+    - TODO
+Walkthrought: 
+    - TODO
 
 ** Issues **
-when Temp Folder is changes, logs and screenshot tree views are not refreshed automatically as the path for watcher is loaded only once
+Walkthrought is automatically showed only at first install, when extension is reinstalled, no walkthrought is showed (but it's accesible manually)
 
 ** To improve **
 File watchers are not working in the most effective way (it's not neccessary to watch whole workspace for test files etc.).
