@@ -11,7 +11,7 @@
     "directory": "packages/extester-runner"
   },
   "license": "Apache-2.0",
-  "version": "0.0.251",
+  "version": "0.0.260",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -26,7 +26,7 @@
       {
         "id": "extester-runner.gettingStarted",
         "title": "Get started with ExTester Runner",
-        "description": "Step-by-step guide to quickly setu up and start using ExTerster Runner",
+        "description": "Step-by-step guide to quickly set up and start using ExTester Runner",
         "steps": [
           {
             "id": "setTsConfig",
