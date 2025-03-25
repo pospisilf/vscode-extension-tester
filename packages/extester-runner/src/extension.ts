@@ -35,7 +35,21 @@ let logger: Logger;
  *
  * @param {vscode.ExtensionContext} context - The extension context, used for managing subscriptions.
  */
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+
+	// Open walkthrough automatically if it's the first activation
+	const hasShownWalkthrough = context.globalState.get<boolean>('extesterRunner.walkthroughShown');
+	if (!hasShownWalkthrough) {
+		await vscode.commands.executeCommand(
+			'workbench.action.openWalkthrough',
+			'extester-runner.gettingStarted',
+			false // don't open in editor tab
+		);
+
+		// Mark walkthrough as shown to prevent repeated openings
+		context.globalState.update('extesterRunner.walkthroughShown', true);
+	}
+
 	// Create an output channel for logging.
 	const outputChannel = vscode.window.createOutputChannel('ExTester Runner');
 	logger = createLogger(outputChannel);
