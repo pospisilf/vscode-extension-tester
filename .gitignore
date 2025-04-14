@@ -6,5 +6,8 @@ tests/test-project/coverage/
 dist/
 .vscode-test/
 .DS_Store
+<<<<<<< HEAD
 test-resources
 .test-extensions
+=======
+>>>>>>> b7b5d89 (add unit tests for parser and tasks)
